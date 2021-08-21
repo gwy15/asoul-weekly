@@ -1,0 +1,49 @@
+[package]
+name = "asoul_weekly"
+version = "0.1.0"
+edition = "2018"
+default-run = "asoul_weekly"
+
+[workspace]
+members = ["auto_gen_article"]
+
+[profile.release]
+lto = true
+codegen-units = 1
+
+[[bin]]
+name = "print_group"
+path = "bin/print_group.rs"
+
+[features]
+default = ["native-tls"]
+native-tls = ["reqwest/native-tls", "sqlx/runtime-actix-native-tls"]
+rustls = ["reqwest/rustls-tls", "sqlx/runtime-actix-rustls"]
+
+[dependencies]
+actix-web = "4.0.0-beta.8"
+tokio = { version = "1", features = ["full"] }
+futures = "0.3.16"
+reqwest = { version = "0.11.4", default-features = false, features = ["json", "multipart"] }
+parking_lot = "0.11.1"
+# redis = { version = "0.21.0", features = ["tokio-comp"] }
+# bb8 = "0.7.0"
+# bb8-redis = "0.10.0"
+sqlx = { version = "0.5.5", features = ["sqlite", "macros", "chrono", "migrate"] }
+
+anyhow = "*"
+
+serde = { version = "1", features = ["derive"] }
+serde_json = "*"
+toml = "0.5.8"
+
+log = "*"
+log4rs = "1.0.0"
+
+biliapi = "0.1.10-beta.8"
+chrono = "0.4.19"
+chrono-tz = "0.5.3"
+
+lazy_static = "1.4.0"
+
+[dev-dependencies]

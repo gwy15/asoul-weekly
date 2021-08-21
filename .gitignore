@@ -1,0 +1,10 @@
+/target
+/logs
+
+config.toml
+*.rdb
+docker-compose.yml
+
+data.sqlite*
+
+persisted_cookies.json*

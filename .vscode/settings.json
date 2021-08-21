@@ -1,0 +1,17 @@
+{
+    "cSpell.words": [
+        "Feishu",
+        "bilibili",
+        "blockquote",
+        "cardbody",
+        "csrf",
+        "repost",
+        "sadd",
+        "sismember",
+        "sqlx",
+        "zhuanlan"
+    ],
+    "rust-analyzer.server.extraEnv": {
+        "DATABASE_URL": "sqlite://data.sqlite"
+    }
+}

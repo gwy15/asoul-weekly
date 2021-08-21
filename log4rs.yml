@@ -1,0 +1,71 @@
+# i.e. handler
+appenders:
+  console_appender:
+    kind: console
+    # i.e. formatter
+    encoder:
+      kind: pattern
+      pattern: "{date(%H:%M:%S%.3f)} [{highlight({level})}] (({target}:{line})) - {message}{n}"
+    filters:
+      - kind: threshold
+        level: info
+
+  file_appender:
+    kind: rolling_file
+    path: logs/main.log
+    policy:
+      kind: compound
+      trigger:
+        kind: size
+        limit: 10mb
+      roller:
+        kind: fixed_window
+        pattern: logs/main.{}.log
+        count: 5
+        base: 1
+    encoder:
+      kind: pattern
+      pattern: "{date(%Y-%m-%d %H:%M:%S%.f %Z)} [{level}] (({target}:{line})) - {message}{n}"
+
+  error_appender:
+    kind: rolling_file
+    path: logs/error.log
+    policy:
+      kind: compound
+      trigger:
+        kind: size
+        limit: 10mb
+      roller:
+        kind: fixed_window
+        pattern: logs/error.{}.log
+        count: 5
+        base: 1
+    encoder:
+      kind: pattern
+      pattern: "{date(%Y-%m-%d %H:%M:%S%.f %Z)} [{level}] (({target}:{line})) - {message}{n}"
+    filters:
+      - kind: "threshold"
+        level: "warn"
+
+root:
+  level: debug
+  appenders:
+    - file_appender
+    - console_appender
+    - error_appender
+
+loggers:
+  sqlx:
+    level: warn
+    appenders:
+      - file_appender
+      - console_appender
+      - error_appender
+    additive: false
+  hyper:
+    level: warn
+    appenders:
+      - file_appender
+      - console_appender
+      - error_appender
+    additive: false

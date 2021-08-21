@@ -1,0 +1,35 @@
+http_addr = "127.0.0.1:8000"
+sqlite_url = "sqlite://data.sqlite"
+video_categories = [
+    "精剪混剪",
+    "音乐",
+    "手书",
+    "舞蹈",
+    "MMD",
+    "发病",
+    "鬼畜/整活",
+    "其他",
+]
+
+[watch_tags]
+"A-SOUL" = 1712619
+"ASOUL" = 658791
+"A-SOUL二创激励计划" = 18478605
+"ASOUL二创激励计划" = 19217080
+"向晚" = 9221368
+"向晚大魔王" = 17532493
+"贝拉" = 195579
+"贝拉Kira" = 18130563
+"珈乐" = 17872743
+"珈乐Carol" = 17532492
+"乃琳" = 17839311
+"乃琳Queen" = 17532495
+"嘉然" = 17520266
+"嘉然今天吃什么" = 17532487
+
+[feishu]
+app_id = "cli_xxxxxxxxxxxxxx"
+app_secret = "xxxxxxxxxxxxxxxxxxxxxx"
+init_user_ids = [
+    "sdjfnaksdjfgnk",
+]
