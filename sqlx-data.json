@@ -1,0 +1,183 @@
+{
+  "db": "SQLite",
+  "520783c9a4d601dba3a6dccfd7d1799b1408d72f1ddb69dc1e9f9d9330775524": {
+    "query": "\n            SELECT `json`\n            FROM `item`\n            WHERE \n                `message_id` = ?\n            ",
+    "describe": {
+      "columns": [
+        {
+          "name": "json",
+          "ordinal": 0,
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Right": 1
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "561d6e774f59fc540f78cd1d46819ec7bb803a43d29f6fff087cc0dda905ab2b": {
+    "query": "\n            SELECT COUNT(*)\n            FROM `item`\n            WHERE\n                `id` = ?;\n        ",
+    "describe": {
+      "columns": [
+        {
+          "name": "COUNT(*)",
+          "ordinal": 0,
+          "type_info": "Int"
+        }
+      ],
+      "parameters": {
+        "Right": 1
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "b672e6bf7b3d58f245de2537ecde60f2d6e6d8e0b6e01e8beaa67198e276016d": {
+    "query": "\n            SELECT `id`, `json`, `message_id`, `create_time`, `category`, `author`\n            FROM `item`\n            WHERE\n                `create_time` BETWEEN ? AND ?\n                AND `category` is not null\n            ORDER BY `create_time` ASC;\n            ",
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "json",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "message_id",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "create_time",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "category",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "author",
+          "ordinal": 5,
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Right": 2
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false
+      ]
+    }
+  },
+  "ba0409d110f6fd31ee7e756f4b90ccb3d2eebcd94fe7834905b58a8dd9bb7e11": {
+    "query": "\n            SELECT `json`\n            FROM `item`\n            WHERE `id` = ?\n            LIMIT 1;\n            ",
+    "describe": {
+      "columns": [
+        {
+          "name": "json",
+          "ordinal": 0,
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Right": 1
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "bb49004f122de186b2c37f3db5506cc5c4a78ce6c8f28cca049395a2bb26958e": {
+    "query": "\n            UPDATE `item`\n            SET \n                `json` = ?\n            WHERE\n                `id` = ?\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Right": 2
+      },
+      "nullable": []
+    }
+  },
+  "cb75dcbfa6730e5396b05a7720be1b19fca29fed28da40ae9bc40d37caf186b0": {
+    "query": "\n            INSERT INTO `item`\n            (`id`, `json`, `message_id`, `create_time`, `category`, `author`)\n            VALUES\n            (?, ?, ?, ?, ?, ?);\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Right": 6
+      },
+      "nullable": []
+    }
+  },
+  "cc18042967b9f77e624d8976fe899e7519449ccd9e1685e58cefdc175703f81a": {
+    "query": "\n            UPDATE `item`\n            SET \n                `category` = ?,\n                `mark_time` = ?\n            WHERE\n                `id` = ?\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Right": 3
+      },
+      "nullable": []
+    }
+  },
+  "f74e8f9a2c8b7a5ba8a248c97b53d094c3db5b90dd2c8643e3913d48372df97f": {
+    "query": "\n            SELECT `id`, `json`, `message_id`, `create_time`, `category`, `author`\n            FROM `item`\n            WHERE `id` = ?\n            LIMIT 1;\n            ",
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "json",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "message_id",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "create_time",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "category",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "author",
+          "ordinal": 5,
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Right": 1
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false
+      ]
+    }
+  }
+}

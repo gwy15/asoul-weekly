@@ -29,7 +29,7 @@ parking_lot = "0.11.1"
 # redis = { version = "0.21.0", features = ["tokio-comp"] }
 # bb8 = "0.7.0"
 # bb8-redis = "0.10.0"
-sqlx = { version = "0.5.5", features = ["sqlite", "macros", "chrono", "migrate"] }
+sqlx = { version = "0.5.5", features = ["sqlite", "macros", "chrono", "migrate", "offline"] }
 
 anyhow = "*"
 

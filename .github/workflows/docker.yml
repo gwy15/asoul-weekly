@@ -12,9 +12,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      SQLX_OFFLINE: 1
     steps:
       - uses: actions/checkout@v2
-
       - name: Generate Docker tags
         id: meta
         uses: crazy-max/ghaction-docker-meta@v2
