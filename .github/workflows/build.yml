@@ -7,6 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SQLX_OFFLINE: 1
+      ASOUL_WEEKLY_URL: https://example.com
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2

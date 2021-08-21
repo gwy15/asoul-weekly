@@ -2,7 +2,11 @@
 FROM rust:slim-buster as builder
 WORKDIR /code
 COPY . .
-RUN cargo b --release --no-default-features --features rustls && strip target/release/asoul_weekly
+ENV SQLX_OFFLINE=1
+RUN cargo build --release \
+        --no-default-features --features rustls \
+        --bin asoul_weekly \
+    && strip target/release/asoul_weekly
 
 # 
 FROM debian:buster-slim
