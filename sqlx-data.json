@@ -1,5 +1,29 @@
 {
   "db": "SQLite",
+  "3240548461e5f16694da82058869383ffd5114896acf58892c59418a3205171c": {
+    "query": "\n            SELECT  `name`, chat_id\n            FROM    `group`\n            WHERE   `name` = ?\n            LIMIT 1;\n            ",
+    "describe": {
+      "columns": [
+        {
+          "name": "name",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "chat_id",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Right": 1
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
   "520783c9a4d601dba3a6dccfd7d1799b1408d72f1ddb69dc1e9f9d9330775524": {
     "query": "\n            SELECT `json`\n            FROM `item`\n            WHERE \n                `message_id` = ?\n            ",
     "describe": {
@@ -128,6 +152,16 @@
       "columns": [],
       "parameters": {
         "Right": 3
+      },
+      "nullable": []
+    }
+  },
+  "d1bb39ea38e5bb8b9ca7ffffbd9ab17dff6b53238176fa6978a5672a7c193dd9": {
+    "query": "\n            INSERT INTO `group`\n            (`name`, `chat_id`)\n            VALUES\n            (?, ?);\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Right": 2
       },
       "nullable": []
     }

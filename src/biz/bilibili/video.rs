@@ -59,7 +59,7 @@ async fn all_unsent_videos(pool: &db::Pool, videos: Vec<VideoInfo>) -> Vec<Video
 }
 
 async fn run_once(client: &FeishuClient, db: db::Pool) -> Result<()> {
-    let group = biz::group::create_group("视频筛选", client).await?;
+    let group = biz::group::create_group("视频筛选", client, &db).await?;
 
     let videos = get_all_tags(client).await?;
     let videos = all_unsent_videos(&db, videos).await;

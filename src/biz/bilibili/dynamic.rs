@@ -109,7 +109,7 @@ async fn filter_new_dynamics(
 }
 
 async fn run_once(client: &FeishuClient, pool: db::Pool) -> Result<()> {
-    let group = biz::group::create_group("动态筛选", client).await?;
+    let group = biz::group::create_group("动态筛选", client, &pool).await?;
 
     // 拉动态
     let dynamics = get_all_tags(client).await?;

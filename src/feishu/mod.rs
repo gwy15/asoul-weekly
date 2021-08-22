@@ -61,8 +61,9 @@ impl FeishuClient {
     fn token(&self) -> String {
         format!("Bearer {}", self.token.read())
     }
+    #[allow(unused)]
     pub async fn get_groups(&self) -> Result<Vec<Group>> {
-        // FIXME: 这里需要处理翻页
+        // NOTE: 这里没处理翻页
         let url = "https://open.feishu.cn/open-apis/im/v1/chats?page_size=100";
         let r = self
             .client
@@ -96,6 +97,7 @@ impl FeishuClient {
         Ok(g)
     }
 
+    #[allow(unused)]
     pub async fn get_or_create_group(&self, name: &str) -> Result<Group> {
         let groups = self.get_groups().await?;
         for g in groups {

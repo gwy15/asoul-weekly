@@ -107,8 +107,16 @@ pub async fn new_body(
     info!("new card body set.");
 
     // 把归档结果发送到归档群
+    let _pool = pool.clone();
     tokio::spawn(async move {
-        if let Err(e) = send_notice(is_video, &feishu_client, item_new_body, item.create_time).await
+        if let Err(e) = send_notice(
+            is_video,
+            _pool,
+            &feishu_client,
+            item_new_body,
+            item.create_time,
+        )
+        .await
         {
             error!("发送归档信息失败：{:?}", e);
         }
@@ -126,6 +134,7 @@ pub async fn new_body(
 
 async fn send_notice(
     is_video: bool,
+    pool: db::Pool,
     feishu_client: &FeishuClient,
     body: Vec<Value>,
     time: DateTime<Utc>,
@@ -135,7 +144,7 @@ async fn send_notice(
     } else {
         "动态归档"
     };
-    let group = biz::group::create_group_with_time(group_name, time, feishu_client).await?;
+    let group = biz::group::create_group_with_time(group_name, time, &pool, feishu_client).await?;
     feishu_client
         .send_card(&group.chat_id, wrap_card_body(body))
         .await?;

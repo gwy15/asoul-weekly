@@ -200,6 +200,47 @@ impl Item {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct Group {
+    pub name: String,
+    pub chat_id: String,
+}
+impl Group {
+    pub async fn from_name(name: &str, pool: &Pool) -> Result<Option<Group>> {
+        let group = sqlx::query_as!(
+            Self,
+            r#"
+            SELECT  `name`, chat_id
+            FROM    `group`
+            WHERE   `name` = ?
+            LIMIT 1;
+            "#,
+            name
+        )
+        .fetch_optional(&*pool)
+        .await?;
+        Ok(group)
+    }
+    pub async fn insert(name: &str, chat_id: &str, pool: &Pool) -> Result<Self> {
+        sqlx::query!(
+            r"
+            INSERT INTO `group`
+            (`name`, `chat_id`)
+            VALUES
+            (?, ?);
+            ",
+            name,
+            chat_id
+        )
+        .execute(&*pool)
+        .await?;
+        Ok(Self {
+            name: name.to_string(),
+            chat_id: chat_id.to_string(),
+        })
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
