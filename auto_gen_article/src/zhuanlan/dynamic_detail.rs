@@ -1,6 +1,5 @@
-use biliapi::{requests::BiliResponseExt, Request};
 use asoul_weekly::bilibili::tag_feed::Dynamic;
-
+use biliapi::{requests::BiliResponseExt, Request};
 
 #[derive(Debug, Deserialize)]
 pub struct DynamicDetail {

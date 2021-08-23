@@ -262,7 +262,7 @@ mod test {
         let pool = init("sqlite://:memory:").await.unwrap();
         sqlx::migrate!().run(&pool).await.unwrap();
         item.insert(&pool).await.unwrap();
-        let item = Item::from_id(&id, &pool).await.unwrap();
+        let item = Item::from_id(&id, &pool).await.unwrap().unwrap();
 
         assert_eq!(item.json, json);
         assert_eq!(item.create_time, t);
