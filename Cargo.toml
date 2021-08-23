@@ -19,6 +19,8 @@ path = "bin/print_group.rs"
 default = ["native-tls"]
 native-tls = ["reqwest/native-tls", "sqlx/runtime-actix-native-tls"]
 rustls = ["reqwest/rustls-tls", "sqlx/runtime-actix-rustls"]
+# 是否发送归档信息
+send-archive = []
 
 [dependencies]
 actix-web = "4.0.0-beta.8"

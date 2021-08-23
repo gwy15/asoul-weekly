@@ -1,12 +1,8 @@
 use std::collections::HashMap;
 
-use crate::{
-    biz::{self, cards::wrap_card_body},
-    db, FeishuClient,
-};
+use crate::{biz, db};
 use actix_web::web;
 use anyhow::*;
-use chrono::{DateTime, Utc};
 use serde_json::Value;
 
 /// 飞书对 bind 传回来的 data
@@ -58,9 +54,9 @@ pub enum CallbackData {
 pub async fn new_body(
     action: ActionData,
     pool: &db::Pool,
-    feishu_client: web::Data<crate::FeishuClient>,
+    _feishu_client: web::Data<crate::FeishuClient>,
 ) -> Result<Vec<Value>> {
-    let (item_new_body, item, is_video) = match action.action {
+    let (item_new_body, item, _is_video) = match action.action {
         // 选择类型一定是视频类的
         Action::Select(s) => {
             // 标记类型
@@ -107,20 +103,23 @@ pub async fn new_body(
     info!("new card body set.");
 
     // 把归档结果发送到归档群
-    let _pool = pool.clone();
-    tokio::spawn(async move {
-        if let Err(e) = send_notice(
-            is_video,
-            _pool,
-            &feishu_client,
-            item_new_body,
-            item.create_time,
-        )
-        .await
-        {
-            error!("发送归档信息失败：{:?}", e);
-        }
-    });
+    #[cfg(feature = "archive")]
+    {
+        let _pool = pool.clone();
+        tokio::spawn(async move {
+            if let Err(e) = send_archive(
+                is_video,
+                _pool,
+                &feishu_client,
+                item_new_body,
+                item.create_time,
+            )
+            .await
+            {
+                error!("发送归档信息失败：{:?}", e);
+            }
+        });
+    }
 
     // 返回新的卡片
     let mut bodies = vec![];
@@ -132,12 +131,13 @@ pub async fn new_body(
     Ok(biz::cards::merge_body(bodies))
 }
 
-async fn send_notice(
+#[cfg(feature = "archive")]
+async fn send_archive(
     is_video: bool,
     pool: db::Pool,
-    feishu_client: &FeishuClient,
+    feishu_client: &crate::FeishuClient,
     body: Vec<Value>,
-    time: DateTime<Utc>,
+    time: chrono::DateTime<chrono::Utc>,
 ) -> Result<()> {
     let group_name = if is_video {
         "视频归档"
