@@ -2,7 +2,7 @@ mod error;
 
 use crate::{biz, db, FeishuClient};
 use actix_web::{
-    get, post,
+    get, patch, post,
     web::{self, Json},
     App, HttpServer,
 };
@@ -56,6 +56,30 @@ async fn summary(
     Ok(Json(map))
 }
 
+#[derive(Debug, Deserialize)]
+struct Category {
+    category: String,
+}
+
+#[patch("/items/{id}/category")]
+async fn set_category(
+    id: web::Path<(String,)>,
+    data: web::Json<Category>,
+    db: web::Data<db::Pool>,
+) -> Result<Json<impl Serialize>> {
+    let id = id.into_inner().0;
+    info!("id = {}", id);
+    let category = data.into_inner().category;
+    info!("set category = {}", category);
+    if db::Item::from_id(&id, &db).await?.is_none() {
+        return Err(Error(anyhow!("数据库不存在 {} 的条目", id)));
+    }
+    db::Item::set_category(&id, &category, &db).await?;
+    Ok(Json(json!({
+        "msg": "ok"
+    })))
+}
+
 pub async fn main(
     addr: impl std::net::ToSocketAddrs,
     feishu_client: crate::FeishuClient,
@@ -67,6 +91,7 @@ pub async fn main(
         App::new()
             .service(callback)
             .service(summary)
+            .service(set_category)
             .app_data(db_pool.clone())
             .app_data(feishu_client.clone())
     })

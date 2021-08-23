@@ -1,6 +1,6 @@
 use actix_web::{HttpResponseBuilder, ResponseError};
 
-pub struct Error(anyhow::Error);
+pub struct Error(pub anyhow::Error);
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
 impl std::fmt::Display for Error {

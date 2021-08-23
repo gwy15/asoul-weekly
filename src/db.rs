@@ -100,7 +100,7 @@ impl Item {
         Ok(json)
     }
 
-    pub async fn from_id(id: &str, pool: &Pool) -> Result<Item> {
+    pub async fn from_id(id: &str, pool: &Pool) -> Result<Option<Item>> {
         let raw_item = sqlx::query_as!(
             RawItem::<String>,
             r"
@@ -111,10 +111,13 @@ impl Item {
             ",
             id
         )
-        .fetch_one(&*pool)
+        .fetch_optional(&*pool)
         .await?;
 
-        Ok(raw_item.try_into()?)
+        match raw_item {
+            Some(item) => Ok(Some(item.try_into()?)),
+            None => Ok(None),
+        }
     }
 
     pub async fn set_json(id: &str, json: &str, pool: &Pool) -> Result<()> {

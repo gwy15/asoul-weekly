@@ -65,7 +65,9 @@ pub async fn new_body(
             db::Item::set_category(&bvid, &category, pool).await?;
             // 修改
             info!("getting card body {} from redis", bvid);
-            let item = db::Item::from_id(&bvid, pool).await?;
+            let item = db::Item::from_id(&bvid, pool)
+                .await?
+                .ok_or_else(|| anyhow!("Item {} not exist", bvid))?;
             let v: Vec<Value> = serde_json::from_str(&item.json)?;
             info!("card body {} got.", bvid);
 
@@ -78,7 +80,9 @@ pub async fn new_body(
                 db::Item::set_category(&dynamic_id, "ok", pool).await?;
 
                 // 修改
-                let item = db::Item::from_id(&dynamic_id, pool).await?;
+                let item = db::Item::from_id(&dynamic_id, pool)
+                    .await?
+                    .ok_or_else(|| anyhow!("Item {} not exist", dynamic_id))?;
                 let v: Vec<Value> = serde_json::from_str(&item.json)?;
                 info!("card body of dynamic {} got.", dynamic_id);
 
@@ -90,7 +94,9 @@ pub async fn new_body(
                 db::Item::set_category(&bvid, "deny", pool).await?;
                 // 修改
                 info!("getting card body {} from redis", bvid);
-                let item = db::Item::from_id(&bvid, pool).await?;
+                let item = db::Item::from_id(&bvid, pool)
+                    .await?
+                    .ok_or_else(|| anyhow!("Item {} not exist", bvid))?;
                 let v: Vec<Value> = serde_json::from_str(&item.json)?;
                 info!("card body {} got.", bvid);
 
