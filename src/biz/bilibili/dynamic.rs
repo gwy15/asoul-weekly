@@ -10,10 +10,11 @@ use crate::{bilibili::tag_feed::*, biz, db, feishu::FeishuClient};
 
 pub async fn fetch_forever(client: FeishuClient, pool: db::Pool) -> ! {
     loop {
-        info!("start fetch feed dynamics");
+        info!("开始拉取动态");
         if let Err(e) = run_once(&client, pool.clone()).await {
-            error!("failed to fetch feed dynamics: {:?}", e);
+            error!("拉取动态失败: {:?}", e);
         }
+
         // 1~8点五分钟刷一次，其他时间3分钟一次
         if matches!(Utc::now().with_timezone(&Shanghai).hour(), 1..=8) {
             time::sleep(Duration::from_secs(5 * 60)).await;

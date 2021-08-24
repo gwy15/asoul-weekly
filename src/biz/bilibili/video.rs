@@ -1,5 +1,7 @@
 use anyhow::Result;
 use biliapi::{requests::Request, requests::VideoInfo};
+use chrono::{Timelike, Utc};
+use chrono_tz::Asia::Shanghai;
 use std::{collections::HashMap, time::Duration};
 use tokio::time;
 
@@ -7,15 +9,17 @@ use crate::config::CONFIG;
 use crate::{bilibili::tag_videos::TagVideos, biz, db, feishu::FeishuClient};
 
 pub async fn fetch_forever(client: FeishuClient, db: db::Pool) -> ! {
-    // 2分钟检查一次
-    let mut interval = time::interval(Duration::from_secs(2 * 60));
-    interval.set_missed_tick_behavior(time::MissedTickBehavior::Delay);
     loop {
-        interval.tick().await;
-        info!("start fetch feed videos");
-
+        info!("开始拉取视频");
         if let Err(e) = run_once(&client, db.clone()).await {
             error!("failed to fetch feed videos: {:?}", e);
+        }
+
+        // 1~8点五分钟刷一次，其他时间3分钟一次
+        if matches!(Utc::now().with_timezone(&Shanghai).hour(), 1..=8) {
+            time::sleep(Duration::from_secs(5 * 60)).await;
+        } else {
+            time::sleep(Duration::from_secs(3 * 60)).await;
         }
     }
 }
@@ -27,7 +31,11 @@ async fn get_all_tags(client: &FeishuClient) -> Result<Vec<VideoInfo>> {
         tick.tick().await;
         info!("getting videos for tag {}", tag_name);
         let tag_videos = TagVideos::request(&client.client, *tag_id).await?;
-        debug!("tag {} videos: {}", tag_name, tag_videos.len());
+        debug!(
+            "tag {} videos: {}",
+            tag_name,
+            tag_videos.news.archives.len()
+        );
         let l = videos.len();
         videos.extend(
             tag_videos
@@ -40,7 +48,7 @@ async fn get_all_tags(client: &FeishuClient) -> Result<Vec<VideoInfo>> {
                 .filter(|v| v.duration.as_secs() >= 20)
                 .map(|v| (v.bvid.clone(), v)),
         );
-        info!("{} videos got for tag {}", videos.len() - l, tag_name);
+        info!("{} new videos got for tag {}", videos.len() - l, tag_name);
     }
     let mut videos: Vec<_> = videos.into_values().collect();
     videos.sort_unstable_by_key(|v| v.publish_at);
