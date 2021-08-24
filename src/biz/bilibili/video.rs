@@ -27,6 +27,7 @@ async fn get_all_tags(client: &FeishuClient) -> Result<Vec<VideoInfo>> {
         tick.tick().await;
         info!("getting videos for tag {}", tag_name);
         let tag_videos = TagVideos::request(&client.client, *tag_id).await?;
+        debug!("tag {} videos: {}", tag_name, tag_videos.len());
         let l = videos.len();
         videos.extend(
             tag_videos
