@@ -5,7 +5,7 @@ edition = "2018"
 default-run = "asoul_weekly"
 
 [workspace]
-members = ["auto_gen_article"]
+members = ["gen-article"]
 
 [profile.release]
 lto = true

@@ -9,6 +9,7 @@ async fn main() -> Result<()> {
     let token_manager =
         feishu::TokenManager::new(config.feishu.app_id, config.feishu.app_secret).await?;
     let token = token_manager.token();
+    // println!("{}", token.read());
     let feishu_client = FeishuClient::new(token);
 
     let groups = feishu_client.get_groups().await?;
