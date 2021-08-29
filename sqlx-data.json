@@ -1,5 +1,15 @@
 {
   "db": "SQLite",
+  "2221b95e3ac20858a58782e75fd861439e83d357e28d39eec18831535dd5b13c": {
+    "query": "\n            UPDATE `item`\n            SET \n                `category` = NULL,\n                `mark_time` = ?\n            WHERE\n                `id` = ?\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Right": 2
+      },
+      "nullable": []
+    }
+  },
   "3240548461e5f16694da82058869383ffd5114896acf58892c59418a3205171c": {
     "query": "\n            SELECT  `name`, chat_id\n            FROM    `group`\n            WHERE   `name` = ?\n            LIMIT 1;\n            ",
     "describe": {

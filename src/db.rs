@@ -157,6 +157,25 @@ impl Item {
         Ok(())
     }
 
+    pub async fn remove_category(id: &str, pool: &Pool) -> Result<()> {
+        let t = Utc::now();
+        sqlx::query!(
+            r"
+            UPDATE `item`
+            SET 
+                `category` = NULL,
+                `mark_time` = ?
+            WHERE
+                `id` = ?
+            ",
+            t,
+            id
+        )
+        .execute(&*pool)
+        .await?;
+        Ok(())
+    }
+
     pub async fn all_item_json(message_id: &str, pool: &Pool) -> Result<Vec<String>> {
         let s = sqlx::query_scalar!(
             r"
