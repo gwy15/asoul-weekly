@@ -77,7 +77,7 @@ pub async fn new_body(
         Action::Button(b) => {
             if b.value.get("type").map(|s| s.as_str()) == Some("dynamic") {
                 let dynamic_id = b.value["dynamic_id"].to_string();
-                db::Item::set_category(&dynamic_id, "ok", pool).await?;
+                db::Item::set_category(&dynamic_id, "动态", pool).await?;
 
                 // 修改
                 let item = db::Item::from_id(&dynamic_id, pool)

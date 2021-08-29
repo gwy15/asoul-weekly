@@ -10,8 +10,15 @@ pub async fn categorized(date: DateTime<Utc>, pool: &db::Pool) -> Result<Map<Str
     for item in items {
         map.entry(item.category.unwrap()).or_default().push(item.id);
     }
-    // rename ok => 动态
+    // legacy: rename ok => 动态
     if let Some(dynamics) = map.remove("ok") {
+        for dynamic_id in dynamics {
+            map.entry("动态".to_string())
+                .or_default()
+                .push(format!("https://t.bilibili.com/{}", dynamic_id));
+        }
+    }
+    if let Some(dynamics) = map.remove("动态") {
         for dynamic_id in dynamics {
             map.entry("动态".to_string())
                 .or_default()
