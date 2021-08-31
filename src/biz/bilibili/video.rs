@@ -45,7 +45,7 @@ async fn get_all_tags(client: &FeishuClient) -> Result<Vec<VideoInfo>> {
                 // 直接筛掉转载
                 .filter(|v| v.copyright != 2)
                 // 筛选时长
-                .filter(|v| v.duration.as_secs() >= 20)
+                .filter(|v| v.duration.as_secs() >= 10)
                 .map(|v| (v.bvid.clone(), v)),
         );
         info!("{} new videos got for tag {}", videos.len() - l, tag_name);
