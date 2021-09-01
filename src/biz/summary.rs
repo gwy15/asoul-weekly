@@ -11,19 +11,17 @@ pub async fn categorized(date: DateTime<Utc>, pool: &db::Pool) -> Result<Map<Str
         map.entry(item.category.unwrap()).or_default().push(item.id);
     }
     // legacy: rename ok => 动态
+    let mut dynamic_ids = vec![];
     if let Some(dynamics) = map.remove("ok") {
-        for dynamic_id in dynamics {
-            map.entry("动态".to_string())
-                .or_default()
-                .push(format!("https://t.bilibili.com/{}", dynamic_id));
-        }
+        dynamic_ids.extend(dynamics);
     }
     if let Some(dynamics) = map.remove("动态") {
-        for dynamic_id in dynamics {
-            map.entry("动态".to_string())
-                .or_default()
-                .push(format!("https://t.bilibili.com/{}", dynamic_id));
-        }
+        dynamic_ids.extend(dynamics);
+    }
+    for dynamic_id in dynamic_ids {
+        map.entry("动态".to_string())
+            .or_default()
+            .push(format!("https://t.bilibili.com/{}", dynamic_id));
     }
     Ok(map)
 }
