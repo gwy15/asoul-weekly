@@ -3,7 +3,7 @@ FROM rust:slim-buster as builder
 WORKDIR /code
 COPY . .
 ENV SQLX_OFFLINE=1
-RUN RUN apt update \
+RUN apt update \
     && apt-get install -y clang lld \
     && cargo b --release --no-default-features --features rustls --bin asoul_weekly \
     && strip target/release/asoul_weekly
