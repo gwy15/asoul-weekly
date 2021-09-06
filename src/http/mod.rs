@@ -2,7 +2,7 @@ mod error;
 
 use crate::{biz, db, FeishuClient};
 use actix_web::{
-    get, patch, post, delete,
+    delete, get, patch, post,
     web::{self, Json},
     App, HttpServer,
 };
@@ -15,11 +15,15 @@ use error::*;
 
 #[post("/callback")]
 async fn callback(
-    data: Json<CallbackData>,
+    // data: Json<CallbackData>,
+    data: Json<Value>,
     db_pool: web::Data<db::Pool>,
     feishu_client: web::Data<FeishuClient>,
 ) -> Result<Json<Value>> {
     let data = data.into_inner();
+
+    debug!("callback data: {}", data.to_string());
+    let data: CallbackData = serde_json::from_value(data).map_err(anyhow::Error::from)?;
 
     let j = match data {
         CallbackData::Bind(b) => json!({
