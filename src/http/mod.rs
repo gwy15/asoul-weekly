@@ -78,7 +78,7 @@ async fn set_category(
     if db::Item::from_id(&id, &db).await?.is_none() {
         return Err(Error(anyhow!("数据库不存在 {} 的条目", id)));
     }
-    db::Item::set_category(&id, &category, &db).await?;
+    db::Item::set_category(&id, &category, "HTTP API", &db).await?;
     Ok(Json(json!({
         "msg": "ok"
     })))

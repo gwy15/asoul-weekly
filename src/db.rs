@@ -137,20 +137,22 @@ impl Item {
         Ok(())
     }
 
-    pub async fn set_category(id: &str, category: &str, pool: &Pool) -> Result<()> {
+    pub async fn set_category(id: &str, category: &str, marker: &str, pool: &Pool) -> Result<()> {
         let t = Utc::now();
         sqlx::query!(
             r"
             UPDATE `item`
             SET 
                 `category` = ?,
-                `mark_time` = ?
+                `mark_time` = ?,
+                `marker` = ?
             WHERE
                 `id` = ?
             ",
             category,
             t,
-            id
+            id,
+            marker
         )
         .execute(&*pool)
         .await?;
@@ -164,7 +166,8 @@ impl Item {
             UPDATE `item`
             SET 
                 `category` = NULL,
-                `mark_time` = ?
+                `mark_time` = ?,
+                `marker` = NULL
             WHERE
                 `id` = ?
             ",

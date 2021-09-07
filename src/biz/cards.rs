@@ -142,17 +142,6 @@ pub fn video_to_accepted(body: CardBody, category: String) -> CardBody {
     ]
 }
 
-pub fn video_to_denied(body: CardBody) -> CardBody {
-    vec![
-        body[0].clone(),
-        json!({
-          "tag": "markdown",
-          "content": "❌ 已拒绝"
-        }),
-        body[2].clone(),
-    ]
-}
-
 pub fn dynamic_to_ok(body: CardBody) -> CardBody {
     // 一共三段，修改中间的
     vec![

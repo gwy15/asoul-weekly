@@ -14,11 +14,12 @@ pub struct BindData {
 }
 
 /// 飞书对 action 传过来的数据
-/// 
+///
 /// 按钮和多选都是这一个，其中的 action 字段会不同
 #[derive(Debug, Deserialize)]
 pub struct ActionData {
     open_message_id: String,
+    user_id: String,
     token: String,
     action: Action,
 }
@@ -64,7 +65,7 @@ pub async fn new_body(
             // 标记类型
             let bvid = s.value["bvid"].to_string();
             let category = s.option;
-            db::Item::set_category(&bvid, &category, pool).await?;
+            db::Item::set_category(&bvid, &category, &action.user_id, pool).await?;
             // 修改
             info!("getting card body {} from db", bvid);
             let item = db::Item::from_id(&bvid, pool)
@@ -79,7 +80,7 @@ pub async fn new_body(
         Action::Button(b) => {
             if b.value.get("type").map(|s| s.as_str()) == Some("dynamic") {
                 let dynamic_id = b.value["dynamic_id"].to_string();
-                db::Item::set_category(&dynamic_id, "动态", pool).await?;
+                db::Item::set_category(&dynamic_id, "动态", &action.user_id, pool).await?;
 
                 // 修改
                 let item = db::Item::from_id(&dynamic_id, pool)
@@ -90,19 +91,7 @@ pub async fn new_body(
 
                 (biz::cards::dynamic_to_ok(v), item, false)
             } else {
-                // 历史遗留代码，对视频的拒绝
-                let bvid = b.value["bvid"].to_string();
-
-                db::Item::set_category(&bvid, "deny", pool).await?;
-                // 修改
-                info!("getting card body {} from db", bvid);
-                let item = db::Item::from_id(&bvid, pool)
-                    .await?
-                    .ok_or_else(|| anyhow!("Item {} not exist", bvid))?;
-                let v: Vec<Value> = serde_json::from_str(&item.json)?;
-                info!("card body {} got.", bvid);
-
-                (biz::cards::video_to_denied(v), item, true)
+                bail!("button value.type != dynamic");
             }
         }
     };
