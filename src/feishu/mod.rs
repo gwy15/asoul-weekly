@@ -255,7 +255,11 @@ impl FeishuClient {
         let rsp: DataResponse<Page<User>> = self
             .client
             .get(url)
-            .query(&[("department_id", "0"), ("user_id_type", "user_id")])
+            .query(&[
+                ("department_id", "0"),
+                ("user_id_type", "user_id"),
+                ("page_size", "50"),
+            ])
             .header(AUTHORIZATION, self.token())
             .send()
             .await?
