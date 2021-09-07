@@ -151,8 +151,8 @@ impl Item {
             ",
             category,
             t,
+            marker,
             id,
-            marker
         )
         .execute(&*pool)
         .await?;
@@ -222,6 +222,40 @@ impl Item {
             res.push(item.try_into()?);
         }
         Ok(res)
+    }
+
+    /// 返回 (user_id, 标记次数)
+    pub async fn get_kpi(date: DateTime<Utc>, pool: &Pool) -> Result<Vec<(String, u32)>> {
+        // 把 Utc 切换成这个日期对应的 UTC+8 的自然资源，然后再表示成 Utc 时间
+        let date = date.with_timezone(&Shanghai).date();
+        let start = date.and_hms(0, 0, 0).with_timezone(&Utc);
+        let start = start.format("%Y-%m-%d %H:%M:%S").to_string();
+        let end = date.and_hms(23, 59, 59).with_timezone(&Utc);
+        let end = end.format("%Y-%m-%d %H:%M:%S").to_string();
+
+        #[derive(sqlx::FromRow)]
+        struct MarkerScore {
+            marker: String,
+            count: u32,
+        }
+
+        let items: Vec<MarkerScore> = sqlx::query_as(
+            r#"
+            SELECT `marker`, COUNT(*) as count
+            FROM `item`
+            WHERE
+                `marker` is not NULL
+                AND
+                `mark_time` BETWEEN $1 AND $2
+            GROUP BY `marker`
+            "#,
+        )
+        .bind(start)
+        .bind(end)
+        .fetch_all(&*pool)
+        .await?;
+
+        Ok(items.into_iter().map(|m| (m.marker, m.count)).collect())
     }
 }
 
@@ -303,5 +337,47 @@ mod test {
         let t: DateTime<Utc> = DateTime::from_utc(t, Utc);
         dbg!(t);
         dbg!(t.to_string());
+    }
+
+    #[tokio::test]
+    async fn test_get_kpi() -> Result<()> {
+        let pool = init("sqlite://:memory:").await?;
+        sqlx::migrate!().run(&pool).await?;
+        let id = "sdjkfneig".to_string();
+        let item = Item {
+            id: id.to_string(),
+            json: "123".to_string(),
+            message_id: "123".to_string(),
+            create_time: Utc::now(),
+            category: None,
+            author: "123".to_string(),
+        };
+        item.insert(&pool).await?;
+        Item::set_category(&id, "category", "marker", &pool).await?;
+        let kpi = Item::get_kpi(Utc::now(), &pool).await?;
+        assert_eq!(kpi, vec![("marker".to_string(), 1)]);
+
+        let id = "kjtrnyx".to_string();
+        let item = Item {
+            id: id.to_string(),
+            json: "123".to_string(),
+            message_id: "123".to_string(),
+            create_time: Utc::now(),
+            category: None,
+            author: "123".to_string(),
+        };
+        item.insert(&pool).await?;
+        Item::set_category(&id, "category", "marker2", &pool).await?;
+        let kpi = Item::get_kpi(Utc::now(), &pool).await?;
+        assert_eq!(
+            kpi,
+            vec![("marker".to_string(), 1), ("marker2".to_string(), 1)]
+        );
+
+        Item::set_category(&id, "category", "marker", &pool).await?;
+        let kpi = Item::get_kpi(Utc::now(), &pool).await?;
+        assert_eq!(kpi, vec![("marker".to_string(), 2)]);
+
+        Ok(())
     }
 }

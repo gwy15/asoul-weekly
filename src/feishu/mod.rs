@@ -247,4 +247,22 @@ impl FeishuClient {
         info!("response: {:?}", r);
         Ok(())
     }
+
+    /// https://open.feishu.cn/open-apis/contact/v3/users
+    pub async fn get_users_in_tenant(&self) -> Result<Vec<User>> {
+        info!("getting users in tenant");
+        let url = "https://open.feishu.cn/open-apis/contact/v3/users";
+        let rsp: DataResponse<Page<User>> = self
+            .client
+            .get(url)
+            .query(&[("department_id", "0"), ("user_id_type", "user_id")])
+            .header(AUTHORIZATION, self.token())
+            .send()
+            .await?
+            .json()
+            .await?;
+        let users = rsp.ok()?.into_inner();
+
+        Ok(users)
+    }
 }

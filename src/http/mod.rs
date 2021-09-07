@@ -1,5 +1,7 @@
 mod error;
 
+use std::collections::HashMap;
+
 use crate::{biz, db, FeishuClient};
 use actix_web::{
     delete, get, patch, post,
@@ -46,13 +48,13 @@ async fn callback(
 }
 
 #[derive(Debug, Deserialize)]
-struct SummaryQuery {
+struct DateQuery {
     t: DateTime<Utc>,
 }
 
 #[get("/summary")]
 async fn summary(
-    data: web::Query<SummaryQuery>,
+    data: web::Query<DateQuery>,
     db: web::Data<db::Pool>,
 ) -> Result<Json<impl Serialize>> {
     let t = data.into_inner().t;
@@ -100,6 +102,36 @@ async fn remove_category(
     })))
 }
 
+#[get("/kpi")]
+async fn get_kpi(
+    data: web::Query<DateQuery>,
+    db: web::Data<db::Pool>,
+    feishu_client: web::Data<FeishuClient>,
+) -> Result<Json<impl Serialize>> {
+    let date = data.into_inner().t;
+
+    let kpi = db::Item::get_kpi(date, &db).await?;
+    let users = feishu_client.get_users_in_tenant().await?;
+    let user_id_to_name: HashMap<String, String> =
+        users.into_iter().map(|u| (u.user_id, u.name)).collect();
+
+    let mut result = vec![];
+    for (user_id, times) in kpi {
+        match user_id_to_name.get(&user_id) {
+            Some(name) => result.push(json!({
+                "name": name,
+                "times": times,
+            })),
+            None => result.push(json!({
+                "name": "？？？",
+                "times": times
+            })),
+        }
+    }
+
+    Ok(Json(result))
+}
+
 pub async fn main(
     addr: impl std::net::ToSocketAddrs,
     feishu_client: crate::FeishuClient,
@@ -113,6 +145,7 @@ pub async fn main(
             .service(summary)
             .service(set_category)
             .service(remove_category)
+            .service(get_kpi)
             .app_data(db_pool.clone())
             .app_data(feishu_client.clone())
     })
