@@ -14,6 +14,8 @@ pub struct BindData {
 }
 
 /// 飞书对 action 传过来的数据
+/// 
+/// 按钮和多选都是这一个，其中的 action 字段会不同
 #[derive(Debug, Deserialize)]
 pub struct ActionData {
     open_message_id: String,
@@ -64,7 +66,7 @@ pub async fn new_body(
             let category = s.option;
             db::Item::set_category(&bvid, &category, pool).await?;
             // 修改
-            info!("getting card body {} from redis", bvid);
+            info!("getting card body {} from db", bvid);
             let item = db::Item::from_id(&bvid, pool)
                 .await?
                 .ok_or_else(|| anyhow!("Item {} not exist", bvid))?;
@@ -93,7 +95,7 @@ pub async fn new_body(
 
                 db::Item::set_category(&bvid, "deny", pool).await?;
                 // 修改
-                info!("getting card body {} from redis", bvid);
+                info!("getting card body {} from db", bvid);
                 let item = db::Item::from_id(&bvid, pool)
                     .await?
                     .ok_or_else(|| anyhow!("Item {} not exist", bvid))?;
