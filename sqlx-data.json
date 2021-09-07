@@ -1,11 +1,21 @@
 {
   "db": "SQLite",
-  "2221b95e3ac20858a58782e75fd861439e83d357e28d39eec18831535dd5b13c": {
-    "query": "\n            UPDATE `item`\n            SET \n                `category` = NULL,\n                `mark_time` = ?\n            WHERE\n                `id` = ?\n            ",
+  "1aaa2e5ee57cd684dfc840d7ab8357c74b721be59e1c72afdd33e78758280f36": {
+    "query": "\n            UPDATE `item`\n            SET \n                `category` = NULL,\n                `mark_time` = ?,\n                `marker` = NULL\n            WHERE\n                `id` = ?\n            ",
     "describe": {
       "columns": [],
       "parameters": {
         "Right": 2
+      },
+      "nullable": []
+    }
+  },
+  "2b2025b43f4c1fb6826d4eeb6d4968cbb133666e79affec32ec6a2b95db6e196": {
+    "query": "\n            UPDATE `item`\n            SET \n                `category` = ?,\n                `mark_time` = ?,\n                `marker` = ?\n            WHERE\n                `id` = ?\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Right": 4
       },
       "nullable": []
     }
@@ -152,16 +162,6 @@
       "columns": [],
       "parameters": {
         "Right": 6
-      },
-      "nullable": []
-    }
-  },
-  "cc18042967b9f77e624d8976fe899e7519449ccd9e1685e58cefdc175703f81a": {
-    "query": "\n            UPDATE `item`\n            SET \n                `category` = ?,\n                `mark_time` = ?\n            WHERE\n                `id` = ?\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Right": 3
       },
       "nullable": []
     }
