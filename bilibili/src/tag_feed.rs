@@ -171,6 +171,7 @@ impl Request for TagFeedHistory {
     }
 }
 
+#[cfg(test)]
 #[tokio::test]
 async fn test_tag_feed() {
     let client = biliapi::connection::new_client().unwrap();
@@ -196,7 +197,7 @@ async fn test_tag_feed() {
             let card: PictureDynamic = match serde_json::from_str(&card) {
                 Ok(e) => Some(e),
                 Err(e) => {
-                    error!("failed parse card to DynamicCard: {:?}", e);
+                    log::error!("failed parse card to DynamicCard: {:?}", e);
                     None
                 }
             }?;

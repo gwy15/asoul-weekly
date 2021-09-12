@@ -254,6 +254,7 @@ dependencies = [
  "actix-web",
  "anyhow",
  "biliapi",
+ "bilibili",
  "chrono",
  "chrono-tz",
  "futures",
@@ -278,8 +279,10 @@ dependencies = [
  "futures-io",
  "futures-util",
  "log",
+ "native-tls",
  "pin-project-lite",
  "tokio",
+ "tokio-native-tls",
  "tokio-rustls",
  "tungstenite",
  "webpki-roots",
@@ -341,6 +344,19 @@ dependencies = [
  "serde_json",
  "serde_with",
  "thiserror",
+ "tokio",
+]
+
+[[package]]
+name = "bilibili"
+version = "0.1.0"
+dependencies = [
+ "biliapi",
+ "chrono",
+ "log",
+ "reqwest",
+ "serde",
+ "serde_json",
  "tokio",
 ]
 
@@ -899,6 +915,7 @@ dependencies = [
  "anyhow",
  "asoul_weekly",
  "biliapi",
+ "bilibili",
  "chrono",
  "cookie_store 0.15.0",
  "imagesize",
@@ -2613,6 +2630,7 @@ dependencies = [
  "httparse",
  "input_buffer",
  "log",
+ "native-tls",
  "rand",
  "rustls",
  "sha-1",

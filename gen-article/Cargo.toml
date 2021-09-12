@@ -6,6 +6,7 @@ build = "build.rs"
 
 [dependencies]
 asoul_weekly = { version = "*", path = ".." }
+bilibili = { path = "../bilibili", features = ["native-tls"] }
 
 log = "*"
 log4rs = "1.0.0"

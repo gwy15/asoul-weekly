@@ -11,7 +11,6 @@ extern crate anyhow;
 use anyhow::*;
 use feishu::FeishuClient;
 
-pub mod bilibili;
 mod biz;
 pub mod config;
 pub mod db;

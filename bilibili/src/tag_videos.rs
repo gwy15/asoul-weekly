@@ -25,6 +25,7 @@ impl Request for TagVideos {
     }
 }
 
+#[cfg(test)]
 #[tokio::test]
 async fn test_tag() {
     let tag_id = 1712619;

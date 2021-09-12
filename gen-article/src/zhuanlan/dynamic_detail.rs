@@ -1,4 +1,4 @@
-use asoul_weekly::bilibili::tag_feed::Dynamic;
+use bilibili::tag_feed::Dynamic;
 use biliapi::{requests::BiliResponseExt, Request};
 
 #[derive(Debug, Deserialize)]

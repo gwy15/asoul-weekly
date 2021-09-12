@@ -5,12 +5,9 @@ use chrono_tz::Asia::Shanghai;
 use serde_json::Value;
 use std::borrow::Cow;
 
-use crate::{
-    bilibili::tag_feed::{Dynamic, PictureDynamic},
-    biz,
-    config::CONFIG,
-    feishu::FeishuClient,
-};
+use bilibili::tag_feed::{Dynamic, PictureDynamic};
+
+use crate::{biz, config::CONFIG, feishu::FeishuClient};
 
 type CardBody = Vec<Value>;
 

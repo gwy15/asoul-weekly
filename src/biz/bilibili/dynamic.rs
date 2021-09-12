@@ -1,12 +1,13 @@
 use anyhow::*;
 use biliapi::Request;
+use bilibili::tag_feed::*;
 use chrono::{Timelike, Utc};
 use chrono_tz::Asia::Shanghai;
 use std::{collections::HashMap, time::Duration};
 use tokio::time;
 
 use crate::config::CONFIG;
-use crate::{bilibili::tag_feed::*, biz, db, feishu::FeishuClient};
+use crate::{biz, db, feishu::FeishuClient};
 
 pub async fn fetch_forever(client: FeishuClient, pool: db::Pool) -> ! {
     loop {

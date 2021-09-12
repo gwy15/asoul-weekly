@@ -5,7 +5,10 @@ edition = "2018"
 default-run = "asoul_weekly"
 
 [workspace]
-members = ["gen-article"]
+members = [
+    "gen-article",
+    "bilibili"
+]
 
 [profile.release]
 lto = true
@@ -22,12 +25,13 @@ path = "bin/print_group.rs"
 
 [features]
 default = ["native-tls"]
-native-tls = ["reqwest/native-tls", "sqlx/runtime-actix-native-tls"]
-rustls = ["reqwest/rustls-tls", "sqlx/runtime-actix-rustls"]
+native-tls = ["reqwest/native-tls", "sqlx/runtime-actix-native-tls", "biliapi/native-tls"]
+rustls = ["reqwest/rustls-tls", "sqlx/runtime-actix-rustls", "biliapi/rustls"]
 # 是否发送归档信息
 send-archive = []
 
 [dependencies]
+bilibili = { path = "./bilibili" }
 actix-web = "4.0.0-beta.8"
 tokio = { version = "1", features = ["full"] }
 futures = "0.3.16"
@@ -47,7 +51,7 @@ toml = "0.5.8"
 log = "*"
 log4rs = "1.0.0"
 
-biliapi = "0.1.10-beta.8"
+biliapi = { version = "0.1.10-beta.8", default-features = false }
 chrono = "0.4.19"
 chrono-tz = "0.5.3"
 

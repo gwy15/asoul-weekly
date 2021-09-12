@@ -9,7 +9,7 @@ mod login;
 mod zhuanlan;
 
 use anyhow::*;
-use asoul_weekly::bilibili::tag_feed::*;
+use bilibili::tag_feed::*;
 use biliapi::Request;
 use chrono::{DateTime, Utc};
 use log::*;
