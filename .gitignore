@@ -9,3 +9,4 @@ docker-compose.yml
 data.sqlite*
 
 persisted_cookies.json*
+*.exe

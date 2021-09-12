@@ -25,8 +25,8 @@ path = "bin/print_group.rs"
 
 [features]
 default = ["native-tls"]
-native-tls = ["reqwest/native-tls", "sqlx/runtime-actix-native-tls", "biliapi/native-tls"]
-rustls = ["reqwest/rustls-tls", "sqlx/runtime-actix-rustls", "biliapi/rustls"]
+native-tls = ["reqwest/native-tls", "sqlx/runtime-actix-native-tls", "biliapi/native-tls", "biliapi/native-tls"]
+rustls = ["reqwest/rustls-tls", "sqlx/runtime-actix-rustls", "biliapi/rustls", "biliapi/rustls"]
 # 是否发送归档信息
 send-archive = []
 
@@ -51,7 +51,7 @@ toml = "0.5.8"
 log = "*"
 log4rs = "1.0.0"
 
-biliapi = { version = "0.1.10-beta.8", default-features = false }
+biliapi = { version = "0.1.11", default-features = false }
 chrono = "0.4.19"
 chrono-tz = "0.5.3"
 

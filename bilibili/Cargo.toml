@@ -5,11 +5,11 @@ edition = "2018"
 
 [features]
 default = []
-native-tls = ["reqwest/native-tls", "biliapi/native-tls"]
-rustls = ["reqwest/rustls-tls", "biliapi/rustls"]
+native-tls = ["reqwest/native-tls", "biliapi/native-tls", "biliapi/native-tls"]
+rustls = ["reqwest/rustls-tls", "biliapi/rustls", "biliapi/rustls"]
 
 [dependencies]
-biliapi = { version = "0.1.10-beta.8", default-features = false }
+biliapi = { version = "0.1.11", default-features = false }
 serde = { version = "1", features = ["derive"] }
 chrono = "0.4.19"
 reqwest = { version = "0.11.4", default-features = false, features = [] }
