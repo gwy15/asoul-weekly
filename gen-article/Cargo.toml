@@ -22,6 +22,9 @@ regex = "1.5.4"
 imagesize = "0.9.0"
 pretty_env_logger = "*"
 
+lazy_static = "1.4.0"
+maplit = "1.0.2"
+
 # 登录和cookie 持久化
 qrcode = "0.12.0"
 cookie_store = "0.15.0"

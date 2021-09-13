@@ -47,12 +47,12 @@ impl Request for SaveDraft {
                 "summary": args.summary,
                 "words": content.len(),
                 "category": 15, // 生活类
-                "list_id": 0,
+                "list_id": 454181,// 枝江日报
                 "tid": 4,
                 "reprint": 0,
                 "tags": "A-SOUL,ASOUL,向晚,贝拉,珈乐,乃琳,嘉然",
-                "image_urls": "",
-                "origin_image_urls": "",
+                "image_urls": "//i0.hdslb.com/bfs/article/663fca354ef2e3e34ae7fc09462f451e8ea6f36f.jpg",
+                "origin_image_urls": "http://article.biliimg.com/bfs/article/e5dc2802adfc60c171735576f10f767939919207.jpg",
                 "dynamic_intro": "",
                 "media_id": 0,
                 "spoiler": 0,

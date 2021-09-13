@@ -9,14 +9,31 @@ mod login;
 mod zhuanlan;
 
 use anyhow::*;
-use bilibili::tag_feed::*;
 use biliapi::Request;
+use bilibili::tag_feed::*;
 use chrono::{DateTime, Utc};
 use log::*;
-use std::{collections::BTreeMap, time::Duration};
+use std::{
+    collections::{BTreeMap, HashMap},
+    time::Duration,
+};
 
 use login::*;
 use zhuanlan::{cards::Cards, dynamic_detail::DynamicDetail, items::Element, save_draft::*};
+
+lazy_static::lazy_static! {
+    static ref WEIGHT: HashMap<&'static str, i32> = maplit::hashmap!{
+        "音乐" => 0,
+        "舞蹈" => 1,
+        "手书" => 2,
+        "精剪混剪" => 3,
+        "MMD" => 4,
+        "发病" => 5,
+        "鬼畜/整活" => 6,
+        "炸厨房"=>7,
+        "其他" => 8
+    };
+}
 
 const MAX_SIZE: usize = 800;
 const README: &str = r#"
@@ -60,42 +77,129 @@ fn get_size(w: usize, h: usize) -> (usize, usize) {
     ans
 }
 
-async fn content(
-    client: &reqwest::Client,
-    summary: BTreeMap<String, Vec<String>>,
-) -> Result<Vec<Element>> {
-    let mut interval = tokio::time::interval(Duration::from_secs(1));
-    // 导言
-    let mut elements = vec![
-        Element::figure("https://i0.hdslb.com/bfs/article/e5dc2802adfc60c171735576f10f767939919207.jpg", 2560, 1080, 1497568, ""),
-        Element::block_quote("一个魂们大家好，这里是A-SOUL周报的二创日报试行版，二创日报将收录整合有关tag中A-SOUL相关二创，尝试给大家的二创更多的曝光机会，让大家闲暇时间更方便地浏览二创，同时也记录下属于我们和A-SOUL的每一个美好的时刻。"),
+/// 返回版头，引言等
+fn header() -> Vec<Element> {
+    vec![
+        Element::figure(
+            "https://i0.hdslb.com/bfs/article/e5dc2802adfc60c171735576f10f767939919207.jpg",
+            2560,
+            1080,
+            1497568,
+            "",
+        ),
+        Element::block_quote(strip(
+            r#"
+        一个魂们大家好，这里是 A-SOUL 周报的日报试行版，日报将收录整合成员相关动态和有关 tag 中 A-SOUL 相关二创，
+        方便大家快速了解 A-SOUL 动态，同时尝试给大家的二创更多的曝光机会，让大家闲暇时间更方便地浏览二创。
+        希望日报可以记录下属于我们和 A-SOUL 的每一个美好的时刻。"#,
+        )),
         // 分割线
         Element::spacer(),
-        Element::simple_figure("https://i0.hdslb.com/bfs/article/02db465212d3c374a43c60fa2625cc1caeaab796.png", "cut-off-6"),
-    ];
+        Element::simple_figure(
+            "https://i0.hdslb.com/bfs/article/02db465212d3c374a43c60fa2625cc1caeaab796.png",
+            "cut-off-6",
+        ),
+    ]
+}
+
+/// 视频分版头
+fn video_header() -> Vec<Element> {
+    vec![
+        Element::Text {
+            center: true,
+            strong: false,
+            classes: vec!["color-pink-03".to_string(), "font-size-23".to_string()],
+            text: "视频类".to_string(),
+        },
+        Element::raw(strip(
+            r#"<p>
+                <span class="color-green-01 font-size-23">
+                    <span class="font-size-20">&nbsp;&nbsp;</span>
+                    <span class="color-blue-02 font-size-16">
+                        希望大家看到喜欢的
+                        <span class="color-lblue-02">二创作品</span>
+                        可以点击
+                        <span class="color-pink-02">作品详情</span>
+                        ，进入原视频评论区点赞评论一下，大家的支持是二创作者们的最大动力~
+                    </span>
+                </span>
+            </p>"#,
+        )),
+    ]
+}
+
+fn video_end() -> Vec<Element> {
+    vec![Element::simple_figure(
+        "https:////i0.hdslb.com/bfs/article/4adb9255ada5b97061e610b682b8636764fe50ed.png",
+        "cut-off-5",
+    )]
+}
+
+fn dynamic_header() -> Vec<Element> {
+    vec![
+        Element::Text {
+            center: true,
+            strong: false,
+            classes: vec!["color-pink-03".to_string(), "font-size-23".to_string()],
+            text: "美图类".to_string(),
+        },
+        Element::raw(strip(
+            r#"
+        <p>
+            <span class="color-pink-03 font-size-20">
+                &nbsp;&nbsp;
+                <span class="color-blue-02 font-size-16">
+                    希望大家看到喜欢的
+                    <span class="color-lblue-02">二创作品</span>
+                    可以点击下面的
+                    <span class="color-pink-02">作者ID</span>
+                    ，进入原动态评论区点赞评论一下，大家的支持是二创作者们的最大动力~
+                </span>
+            </span>
+        </p>"#,
+        )),
+    ]
+}
+
+fn ending() -> Vec<Element> {
+    vec![
+        Element::Text {
+            center: true,
+            strong: false,
+            classes: vec!["font-size-16".to_string()],
+            text: "以上就是本期日报的全部内容！".to_string(),
+        },
+        Element::Text {
+            center: false,
+            strong: false,
+            classes: vec!["font-size-16".to_string()],
+            text: strip(
+                r#"
+                由于专栏格式所限，部分优秀二创内容无法展示完全。欢迎一个魂们踊跃向周报组投稿自己的内容。
+                如果对枝江日报这个栏目有什么好的意见和建议可以通过私信直接向我们反馈，我们也深知目前还有很多不完善和需要改进的地方，会努力越做越好的！
+            "#,
+            ),
+        },
+    ]
+}
+
+async fn content(
+    client: &reqwest::Client,
+    mut summary: BTreeMap<String, Vec<String>>,
+) -> Result<Vec<Element>> {
+    let mut interval = tokio::time::interval(Duration::from_secs(1));
+
+    // 分类
+    let dynamics = summary.remove("动态").unwrap_or_default();
+    let mut videos = summary.into_iter().collect::<Vec<_>>();
+    videos.sort_unstable_by_key(|(name, _)| WEIGHT.get(name.as_str()).unwrap_or(&99999));
+
+    // 导言
+    let mut elements = header();
 
     // 视频
-    elements.push(Element::Text {
-        center: true,
-        strong: false,
-        classes: vec!["color-pink-03".to_string(), "font-size-23".to_string()],
-        text: "视频类".to_string(),
-    });
-    elements.push(Element::raw(strip(
-        r#"<p>
-        <span class="color-green-01 font-size-23">
-            <span class="font-size-20">&nbsp;&nbsp;</span>
-            <span class="color-blue-02 font-size-16">
-                希望大家看到喜欢的
-                <span class="color-lblue-02">二创作品</span>
-                可以点击
-                <span class="color-pink-02">作品详情</span>
-                ，进入原视频评论区点赞评论一下，大家的支持是二创作者们的最大动力~
-            </span>
-        </span>
-    </p>"#,
-    )));
-    for (category, bvids) in summary.iter() {
+    elements.extend(video_header());
+    for (category, bvids) in videos {
         info!("处理分类 {} 视频", category);
         if category == "动态" {
             continue;
@@ -137,36 +241,11 @@ async fn content(
         }
         elements.push(Element::spacer());
     }
-    // 分割线
-    elements.push(Element::simple_figure(
-        "https:////i0.hdslb.com/bfs/article/4adb9255ada5b97061e610b682b8636764fe50ed.png",
-        "cut-off-5",
-    ));
-    // 动态图片
-    elements.push(Element::Text {
-        center: true,
-        strong: false,
-        classes: vec!["color-pink-03".to_string(), "font-size-23".to_string()],
-        text: "美图类".to_string(),
-    });
-    elements.push(Element::raw(strip(
-        r#"
-    <p>
-        <span class="color-pink-03 font-size-20">
-            &nbsp;&nbsp;
-            <span class="color-blue-02 font-size-16">
-                希望大家看到喜欢的
-                <span class="color-lblue-02">二创作品</span>
-                可以点击下面的
-                <span class="color-pink-02">作者ID</span>
-                ，进入原动态评论区点赞评论一下，大家的支持是二创作者们的最大动力~
-            </span>
-        </span>
-    </p>"#,
-    )));
-    let dynamics = summary.get("动态").cloned().unwrap_or_default();
-    info!("{} 条动态", dynamics.len());
+    elements.extend(video_end());
 
+    // 动态
+    info!("{} 条动态", dynamics.len());
+    elements.extend(dynamic_header());
     for dynamic_url in dynamics {
         let dynamic_id = dynamic_url.replace("https://t.bilibili.com/", "");
         interval.tick().await;
@@ -232,7 +311,7 @@ async fn content(
             "".to_string(),
         ));
         let raw = format!(
-            "<p style=\"text-align: center;\"><a href=\"{}\">↑ {}（{}图）↑</a></p>",
+            "<p style=\"text-align: right;\"><a href=\"{}\"><span class=\"color-gray-02 font-size-12\">↑ @{}（{}图）点我跳转原作品动态  &gt</span></a></p>",
             dynamic_url,
             uname,
             picture_dynamic.inner.pictures.len()
@@ -241,22 +320,7 @@ async fn content(
     }
 
     // 结束
-    elements.push(Element::Text {
-        center: true,
-        strong: false,
-        classes: vec!["font-size-16".to_string()],
-        text: "以上就是本次日报的全部内容！".to_string(),
-    });
-    elements.push(Element::Text {
-        center: false,
-        strong: false,
-        classes: vec!["font-size-16".to_string()],
-        text: "由于专栏格式所限，部分优秀二创内容无法展示完全。欢迎一个魂们踊跃向周报组投稿自己的内容。如果对二创日报这个栏目有什么好的意见和建议可以通过私信直接向我们反馈，我们也深知目前还有很多不完善和需要改进的地方，会努力越做越好的！".to_string(),
-    });
-
-    // for el in elements.iter() {
-    //     println!("{}", el);
-    // }
+    elements.extend(ending());
 
     Ok(elements)
 }
@@ -305,7 +369,7 @@ async fn main() -> anyhow::Result<()> {
     let summary = data(t).await?;
     // 发送草稿
     let draft = Draft {
-        title: "二创日报（自动生成）".to_string(),
+        title: "枝江日报（自动生成）".to_string(),
         banner_url: "".to_string(),
         content: content(&client, summary).await?,
         summary: "一个简单的总结，点开草稿会自动重新生成".to_string(),
