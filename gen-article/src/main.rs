@@ -99,32 +99,48 @@ fn header() -> Vec<Element> {
             "https://i0.hdslb.com/bfs/article/02db465212d3c374a43c60fa2625cc1caeaab796.png",
             "cut-off-6",
         ),
+        // 成员动态
+        Element::raw(strip(
+            r#"
+            <figure class="img-box" contenteditable="false">
+                <img src="//article.biliimg.com/bfs/article/20918cafc4379211a476925130111a77543dad6e.png" width="1280" height="600" data-size="22349">
+                <figcaption class="caption" contenteditable=""></figcaption>
+            </figure>
+            "#,
+        )),
     ]
 }
 
 /// 视频分版头
 fn video_header() -> Vec<Element> {
     vec![
-        Element::Text {
-            center: true,
-            strong: false,
-            classes: vec!["color-pink-03".to_string(), "font-size-23".to_string()],
-            text: "视频类".to_string(),
-        },
         Element::raw(strip(
-            r#"<p>
-                <span class="color-green-01 font-size-23">
-                    <span class="font-size-20">&nbsp;&nbsp;</span>
-                    <span class="color-blue-02 font-size-16">
-                        希望大家看到喜欢的
-                        <span class="color-lblue-02">二创作品</span>
-                        可以点击
-                        <span class="color-pink-02">作品详情</span>
-                        ，进入原视频评论区点赞评论一下，大家的支持是二创作者们的最大动力~
-                    </span>
-                </span>
-            </p>"#,
-        )),
+            r#"
+        <figure class="img-box" contenteditable="false">
+            <img src="//article.biliimg.com/bfs/article/3946d4cebc8e7d4abcfcb9e95b1dd31439087a81.jpg" width="1280" height="600" data-size="127959">
+            <figcaption class="caption" contenteditable=""></figcaption>
+        </figure>"#
+        ))
+        // Element::Text {
+        //     center: true,
+        //     strong: false,
+        //     classes: vec!["color-pink-03".to_string(), "font-size-23".to_string()],
+        //     text: "视频类".to_string(),
+        // },
+        // Element::raw(strip(
+        //     r#"<p>
+        //         <span class="color-green-01 font-size-23">
+        //             <span class="font-size-20">&nbsp;&nbsp;</span>
+        //             <span class="color-blue-02 font-size-16">
+        //                 希望大家看到喜欢的
+        //                 <span class="color-lblue-02">二创作品</span>
+        //                 可以点击
+        //                 <span class="color-pink-02">作品详情</span>
+        //                 ，进入原视频评论区点赞评论一下，大家的支持是二创作者们的最大动力~
+        //             </span>
+        //         </span>
+        //     </p>"#,
+        // )),
     ]
 }
 
@@ -137,32 +153,45 @@ fn video_end() -> Vec<Element> {
 
 fn dynamic_header() -> Vec<Element> {
     vec![
-        Element::Text {
-            center: true,
-            strong: false,
-            classes: vec!["color-pink-03".to_string(), "font-size-23".to_string()],
-            text: "美图类".to_string(),
-        },
-        Element::raw(strip(
-            r#"
-        <p>
-            <span class="color-pink-03 font-size-20">
-                &nbsp;&nbsp;
-                <span class="color-blue-02 font-size-16">
-                    希望大家看到喜欢的
-                    <span class="color-lblue-02">二创作品</span>
-                    可以点击下面的
-                    <span class="color-pink-02">作者ID</span>
-                    ，进入原动态评论区点赞评论一下，大家的支持是二创作者们的最大动力~
-                </span>
-            </span>
-        </p>"#,
-        )),
+        Element::raw(strip(r#"
+        <figure class="img-box" contenteditable="false">
+            <img src="//article.biliimg.com/bfs/article/5af8ffe06bfad9815ba644c5ab90205fb7d36fc0.jpg" width="1280" height="600" data-size="114626">
+            <figcaption class="caption" contenteditable=""></figcaption>
+        </figure>
+        "#))
+        // Element::Text {
+        //     center: true,
+        //     strong: false,
+        //     classes: vec!["color-pink-03".to_string(), "font-size-23".to_string()],
+        //     text: "美图类".to_string(),
+        // },
+        // Element::raw(strip(
+        //     r#"
+        // <p>
+        //     <span class="color-pink-03 font-size-20">
+        //         &nbsp;&nbsp;
+        //         <span class="color-blue-02 font-size-16">
+        //             希望大家看到喜欢的
+        //             <span class="color-lblue-02">二创作品</span>
+        //             可以点击下面的
+        //             <span class="color-pink-02">作者ID</span>
+        //             ，进入原动态评论区点赞评论一下，大家的支持是二创作者们的最大动力~
+        //         </span>
+        //     </span>
+        // </p>"#,
+        // )),
     ]
 }
 
 fn ending() -> Vec<Element> {
     vec![
+        // 分割线
+        Element::raw(strip(
+            r#"
+        <figure class="img-box" contenteditable="false">
+            <img src="//i0.hdslb.com/bfs/article/02db465212d3c374a43c60fa2625cc1caeaab796.png" class="cut-off-6">
+        </figure>"#,
+        )),
         Element::Text {
             center: true,
             strong: false,
