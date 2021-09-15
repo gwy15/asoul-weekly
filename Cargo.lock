@@ -875,13 +875,14 @@ dependencies = [
 
 [[package]]
 name = "gen-article"
-version = "0.1.6"
+version = "0.1.7"
 dependencies = [
  "anyhow",
  "asoul_weekly",
  "biliapi",
  "bilibili",
  "chrono",
+ "chrono-tz",
  "cookie_store 0.15.0",
  "imagesize",
  "lazy_static",

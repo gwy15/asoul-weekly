@@ -15,6 +15,7 @@ pub enum Element {
         caption: String,
     },
     /// 简单图片，如分割线
+    #[allow(unused)]
     SimpleFigure { src: String, class: String },
     ///
     Text {
@@ -63,6 +64,7 @@ impl Element {
             caption: caption.into(),
         }
     }
+    #[allow(unused)]
     pub fn simple_figure(src: impl Into<String>, class: impl Into<String>) -> Self {
         Element::SimpleFigure {
             src: src.into(),

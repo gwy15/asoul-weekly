@@ -80,107 +80,59 @@ fn get_size(w: usize, h: usize) -> (usize, usize) {
 /// 返回版头，引言等
 fn header() -> Vec<Element> {
     vec![
-        Element::figure(
-            "https://i0.hdslb.com/bfs/article/e5dc2802adfc60c171735576f10f767939919207.jpg",
-            2560,
-            1080,
-            1497568,
-            "",
-        ),
-        Element::block_quote(strip(
-            r#"
-        一个魂们大家好，这里是 A-SOUL 周报的日报试行版，日报将收录整合成员相关动态和有关 tag 中 A-SOUL 相关二创，
-        方便大家快速了解 A-SOUL 动态，同时尝试给大家的二创更多的曝光机会，让大家闲暇时间更方便地浏览二创。
-        希望日报可以记录下属于我们和 A-SOUL 的每一个美好的时刻。"#,
-        )),
-        // 分割线
         Element::spacer(),
-        Element::simple_figure(
-            "https://i0.hdslb.com/bfs/article/02db465212d3c374a43c60fa2625cc1caeaab796.png",
-            "cut-off-6",
-        ),
+        Element::block_quote(strip(r#"【替换这里为版头】"#)),
         // 成员动态
         Element::raw(strip(
             r#"
-            <figure class="img-box" contenteditable="false">
-                <img src="//article.biliimg.com/bfs/article/20918cafc4379211a476925130111a77543dad6e.png" width="1280" height="600" data-size="22349">
-                <figcaption class="caption" contenteditable=""></figcaption>
+            <figure class="img-box img-seamless" contenteditable="false">
+            <img src="//article.biliimg.com/bfs/article/48b650e9c9a23a594c674e595c94011b0e93af52.jpg" width="1280" height="600" data-size="86603" class="seamless" type="seamlessImage">
             </figure>
             "#,
+        )),
+        Element::spacer(),
+        Element::block_quote(r#"【替换这里为成员动态】"#),
+        Element::spacer(),
+        // 分割线
+        Element::raw(strip(
+            r#"
+            <figure class="img-box" contenteditable="false">
+            <img src="//i0.hdslb.com/bfs/article/02db465212d3c374a43c60fa2625cc1caeaab796.png" class="cut-off-6">
+            </figure>"#,
         )),
     ]
 }
 
 /// 视频分版头
 fn video_header() -> Vec<Element> {
-    vec![
-        Element::raw(strip(
-            r#"
+    vec![Element::raw(strip(
+        r#"
         <figure class="img-box" contenteditable="false">
-            <img src="//article.biliimg.com/bfs/article/3946d4cebc8e7d4abcfcb9e95b1dd31439087a81.jpg" width="1280" height="600" data-size="127959">
+            <img src="//article.biliimg.com/bfs/article/765b627af2487507cd4cb70db903ead4c6915f37.jpg" width="1280" height="600" data-size="127959">
             <figcaption class="caption" contenteditable=""></figcaption>
-        </figure>"#
-        ))
-        // Element::Text {
-        //     center: true,
-        //     strong: false,
-        //     classes: vec!["color-pink-03".to_string(), "font-size-23".to_string()],
-        //     text: "视频类".to_string(),
-        // },
-        // Element::raw(strip(
-        //     r#"<p>
-        //         <span class="color-green-01 font-size-23">
-        //             <span class="font-size-20">&nbsp;&nbsp;</span>
-        //             <span class="color-blue-02 font-size-16">
-        //                 希望大家看到喜欢的
-        //                 <span class="color-lblue-02">二创作品</span>
-        //                 可以点击
-        //                 <span class="color-pink-02">作品详情</span>
-        //                 ，进入原视频评论区点赞评论一下，大家的支持是二创作者们的最大动力~
-        //             </span>
-        //         </span>
-        //     </p>"#,
-        // )),
-    ]
+        </figure>"#,
+    ))]
 }
 
+/// 视频结束分割线
 fn video_end() -> Vec<Element> {
-    vec![Element::simple_figure(
-        "https:////i0.hdslb.com/bfs/article/4adb9255ada5b97061e610b682b8636764fe50ed.png",
-        "cut-off-5",
-    )]
+    vec![Element::raw(strip(
+        r#"
+        <figure class="img-box" contenteditable="false">
+        <img src="//i0.hdslb.com/bfs/article/02db465212d3c374a43c60fa2625cc1caeaab796.png" class="cut-off-6">
+        </figure>
+        "#,
+    ))]
 }
 
+/// 图片分版头
 fn dynamic_header() -> Vec<Element> {
-    vec![
-        Element::raw(strip(r#"
-        <figure class="img-box" contenteditable="false">
-            <img src="//article.biliimg.com/bfs/article/5af8ffe06bfad9815ba644c5ab90205fb7d36fc0.jpg" width="1280" height="600" data-size="114626">
-            <figcaption class="caption" contenteditable=""></figcaption>
-        </figure>
-        "#))
-        // Element::Text {
-        //     center: true,
-        //     strong: false,
-        //     classes: vec!["color-pink-03".to_string(), "font-size-23".to_string()],
-        //     text: "美图类".to_string(),
-        // },
-        // Element::raw(strip(
-        //     r#"
-        // <p>
-        //     <span class="color-pink-03 font-size-20">
-        //         &nbsp;&nbsp;
-        //         <span class="color-blue-02 font-size-16">
-        //             希望大家看到喜欢的
-        //             <span class="color-lblue-02">二创作品</span>
-        //             可以点击下面的
-        //             <span class="color-pink-02">作者ID</span>
-        //             ，进入原动态评论区点赞评论一下，大家的支持是二创作者们的最大动力~
-        //         </span>
-        //     </span>
-        // </p>"#,
-        // )),
-    ]
+    vec![Element::raw(strip(
+        r#"
+        <figure class="img-box img-seamless" contenteditable="false">
+            <img src="//article.biliimg.com/bfs/article/3f3eefbdeaf0d15f1bf5e37dee7462734263fb7d.jpg" width="1280" height="600" data-size="113238" class="seamless" type="seamlessImage">
+        </figure>"#,
+    ))]
 }
 
 fn ending() -> Vec<Element> {
@@ -394,11 +346,12 @@ async fn main() -> anyhow::Result<()> {
 
     // 询问
     let t = Utc::now() - chrono::Duration::days(1);
+    let date_utc8 = t.with_timezone(&chrono_tz::Asia::Shanghai).format("%m.%d");
 
     let summary = data(t).await?;
     // 发送草稿
     let draft = Draft {
-        title: "枝江日报（自动生成）".to_string(),
+        title: format!("枝江日报（{}）", date_utc8),
         banner_url: "".to_string(),
         content: content(&client, summary).await?,
         summary: "一个简单的总结，点开草稿会自动重新生成".to_string(),
