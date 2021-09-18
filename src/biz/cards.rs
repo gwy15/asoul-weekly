@@ -246,6 +246,11 @@ async fn get_dynamic_thumbnail_image_key(
             return Ok("img_v2_1f156161-3ffa-40f7-9d28-9621cc5ed2cg".to_string());
         }
     };
+    debug!(
+        "图片下载完毕，一共下载了 {} 图，大小 {:.2} MiB",
+        image_bytes.len(),
+        image_bytes.iter().map(|i| i.len()).sum::<usize>() as f64 / 1024. / 1024.
+    );
 
     let merged_image_bytes = match merge_images::merge(&image_bytes) {
         Ok(bytes) => bytes,
@@ -254,14 +259,18 @@ async fn get_dynamic_thumbnail_image_key(
             return Ok("img_v2_1f156161-3ffa-40f7-9d28-9621cc5ed2cg".to_string());
         }
     };
+    debug!("图片合并成功");
 
-    client
+    let r = client
         .upload_image_bytes(merged_image_bytes)
         .await
         .or_else(|e| {
             warn!("上传图片失败：{:?}", e);
             Ok("img_v2_1f156161-3ffa-40f7-9d28-9621cc5ed2cg".to_string())
-        })
+        })?;
+
+    debug!("图片上传成功");
+    Ok(r)
 }
 
 pub async fn video_info_to_card_body(info: &VideoInfo, client: &FeishuClient) -> Result<CardBody> {
