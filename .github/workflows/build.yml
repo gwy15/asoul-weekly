@@ -19,10 +19,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install OpenCV
-        uses: Dovyski/setup-opencv-action@v1
-        with:
-          opencv-version: '4.5.0'
-          opencv-extra-modules: false
+        run: |
+          apt update
+          apt-get install -y clang libclang-dev lld libopencv-dev
       - uses: Swatinem/rust-cache@v1
       - name: Build
         run: |
