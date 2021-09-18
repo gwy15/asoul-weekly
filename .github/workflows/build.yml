@@ -18,6 +18,10 @@ jobs:
       ASOUL_WEEKLY_URL: https://example.com
     steps:
       - uses: actions/checkout@v2
+      - name: Install OpenCV
+        run: |
+          sudo apt update
+          sudo apt-get install -y clang libclang-dev lld libopencv-dev
       - uses: Swatinem/rust-cache@v1
       - name: Build
         run: |
