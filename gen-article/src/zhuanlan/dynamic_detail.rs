@@ -1,5 +1,5 @@
-use bilibili::tag_feed::Dynamic;
 use biliapi::{requests::BiliResponseExt, Request};
+use bilibili::tag_feed::Dynamic;
 
 #[derive(Debug, Deserialize)]
 pub struct DynamicDetail {

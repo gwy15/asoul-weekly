@@ -57,4 +57,7 @@ chrono-tz = "0.5.3"
 
 lazy_static = "1.4.0"
 
+# 拼图
+merge-images = { version = "*", git = "https://github.com/gwy15/merge-images" }
+
 [dev-dependencies]

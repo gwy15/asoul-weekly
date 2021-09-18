@@ -199,18 +199,22 @@ impl FeishuClient {
     }
 
     /// 返回 img key
-    pub async fn upload_image(&self, url: &str) -> Result<String> {
-        use reqwest::multipart;
+    pub async fn upload_image_url(&self, url: &str) -> Result<String> {
         // download to mem
         let bytes = self.client.get(url).send().await?.bytes().await?;
         debug!(
             "image downloaded, size = {:.2} MiB",
             bytes.len() as f64 / 1024. / 1024.
         );
+        self.upload_image_bytes(bytes.to_vec()).await
+    }
 
+    /// 返回 img key
+    pub async fn upload_image_bytes(&self, bytes: Vec<u8>) -> Result<String> {
+        use reqwest::multipart;
         let form = multipart::Form::new()
             .text("image_type", "message")
-            .part("image", multipart::Part::bytes(bytes.to_vec()));
+            .part("image", multipart::Part::bytes(bytes));
 
         let url = "https://open.feishu.cn/open-apis/im/v1/images";
         let r = self

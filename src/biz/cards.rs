@@ -32,7 +32,7 @@ fn markdown_escape(s: &str) -> Cow<str> {
 /// 基础信息分行，会上传封面
 async fn video_basic_info(info: &VideoInfo, client: &FeishuClient) -> Result<Value> {
     let url = format!("https://www.bilibili.com/video/{}", info.bvid);
-    let img_key = client.upload_image(&info.cover_url).await?;
+    let img_key = client.upload_image_url(&info.cover_url).await?;
     let up = &info.owner.name;
 
     let intro = format!(
@@ -170,22 +170,8 @@ pub async fn dynamic_card(
         dynamic.desc.dynamic_id,
         markdown_escape(&dynamic.inner.description)
     );
-    // NOTE: 这里只上传第一张图片
-    let image_url = dynamic
-        .inner
-        .pictures
-        .first()
-        .map(|p| p.src.as_str())
-        .ok_or_else(|| anyhow!("动态 {} 没有图片", dynamic.desc.dynamic_id))?;
 
-    let img_key = client.upload_image(image_url).await.unwrap_or_else(|e| {
-        error!(
-            "动态 {} 图片({})上传失败:{:?}",
-            dynamic.desc.dynamic_id, image_url, e
-        );
-        // 替换成上传图片失败的 fallback
-        "img_v2_1f156161-3ffa-40f7-9d28-9621cc5ed2cg".to_string()
-    });
+    let img_key = get_dynamic_thumbnail_image_key(dynamic, client).await?;
 
     let t = dynamic
         .desc
@@ -237,6 +223,45 @@ pub async fn dynamic_card(
         }),
     ];
     Ok(b)
+}
+
+async fn get_dynamic_thumbnail_image_key(
+    dynamic: &Dynamic<PictureDynamic>,
+    client: &FeishuClient,
+) -> Result<String> {
+    // 进行一个贴图的上传
+    let mut image_download_futures = vec![];
+    async fn download_image(client: &FeishuClient, url: String) -> Result<Vec<u8>> {
+        let bytes = client.client.get(url).send().await?.bytes().await?;
+        Ok(bytes.to_vec())
+    }
+    for pic in dynamic.inner.pictures.iter() {
+        let url = pic.src.clone();
+        image_download_futures.push(download_image(client, url));
+    }
+    let image_bytes = match futures::future::try_join_all(image_download_futures).await {
+        Ok(result) => result,
+        Err(e) => {
+            error!("动态的某张图片下载失败了：{:?}", e);
+            return Ok("img_v2_1f156161-3ffa-40f7-9d28-9621cc5ed2cg".to_string());
+        }
+    };
+
+    let merged_image_bytes = match merge_images::merge(&image_bytes) {
+        Ok(bytes) => bytes,
+        Err(e) => {
+            error!("合并图片失败：{:?}", e);
+            return Ok("img_v2_1f156161-3ffa-40f7-9d28-9621cc5ed2cg".to_string());
+        }
+    };
+
+    client
+        .upload_image_bytes(merged_image_bytes)
+        .await
+        .or_else(|e| {
+            warn!("上传图片失败：{:?}", e);
+            Ok("img_v2_1f156161-3ffa-40f7-9d28-9621cc5ed2cg".to_string())
+        })
 }
 
 pub async fn video_info_to_card_body(info: &VideoInfo, client: &FeishuClient) -> Result<CardBody> {
