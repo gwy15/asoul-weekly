@@ -264,12 +264,13 @@ async fn get_dynamic_thumbnail_image_key(
     let r = client
         .upload_image_bytes(merged_image_bytes)
         .await
-        .or_else(|e| {
+        .unwrap_or_else(|e| {
             warn!("上传图片失败：{:?}", e);
-            Ok("img_v2_1f156161-3ffa-40f7-9d28-9621cc5ed2cg".to_string())
-        })?;
+            debug!("使用默认图");
+            "img_v2_1f156161-3ffa-40f7-9d28-9621cc5ed2cg".to_string()
+        });
 
-    debug!("图片上传成功");
+    debug!("图片上传完成");
     Ok(r)
 }
 

@@ -1,2 +1,12 @@
 target
 logs
+
+.dockerignore
+Dockerfile
+docker-compose.yml
+config.toml
+
+*.exe
+persisted_cookies.json*
+data.sqlite
+db
