@@ -10,3 +10,4 @@ config.toml
 persisted_cookies.json*
 data.sqlite
 db
+.env
