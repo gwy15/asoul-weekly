@@ -4,8 +4,7 @@ WORKDIR /code
 COPY . .
 ENV SQLX_OFFLINE=1
 RUN apt update \
-    && apt-get install -y clang libclang-dev lld \
-        libopencv-core-dev libopencv-imgproc-dev libopencv-imgcodecs-dev
+    && apt-get install -y clang libclang-dev lld libopencv-dev
 RUN cargo b --release --no-default-features --features rustls --bin asoul_weekly \
     && strip target/release/asoul_weekly
 
