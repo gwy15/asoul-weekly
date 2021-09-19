@@ -55,7 +55,7 @@ async fn get_all_tags(client: &FeishuClient) -> Result<Vec<Dynamic<PictureDynami
 
         let mut offset = "0".to_string();
         // 最多翻页
-        for times in 0..3 {
+        for times in 0..1 {
             let original_size = dynamics.len();
             // 开始的时候可以用 0
 
