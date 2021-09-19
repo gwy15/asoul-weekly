@@ -30,7 +30,7 @@ fn markdown_escape(s: &str) -> Cow<str> {
         }
         Cow::from(ans)
     } else {
-        Cow::from(s)
+        s
     }
 }
 
