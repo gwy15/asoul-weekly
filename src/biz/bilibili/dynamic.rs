@@ -51,44 +51,44 @@ async fn get_all_tags(client: &FeishuClient) -> Result<Vec<Dynamic<PictureDynami
 
     let mut tick = tokio::time::interval(Duration::from_secs(1));
     for (tag_name, _tag_id) in CONFIG.watch_tags.iter() {
-        let original_size = dynamics.len();
-        // tick.tick().await;
         info!("获取 tag {} 下动态", tag_name);
-        // // 拿热门线
-        // let mut tag_dynamics = TagFeedNew::request(&client.client, tag_name.to_string()).await?;
-        // // 这里面的没用，都是叔叔选的热门消息，要拿 offset 去拿新的
-        // // 反转了，最后一条有用
-        // if let Some(last) = tag_dynamics.cards.pop() {
-        //     if let Some(d) = filter_map(last) {
-        //         dynamics.insert(d.desc.dynamic_id, d);
-        //     }
-        // }
 
-        // let offset = tag_dynamics.offset;
-        // 反转了，这里可以直接用 0 去拿
-        let offset = "0".to_string();
-        tick.tick().await;
-        // 拿时间线
-        let tag_dynamics = TagFeedHistory::request(
-            &client.client,
-            TagFeedHistoryArgs {
-                topic_name: tag_name.to_string(),
-                offset_dynamic_id: offset,
-            },
-        )
-        .await?;
+        let mut offset = "0".to_string();
+        // 最多翻页
+        for times in 0..3 {
+            let original_size = dynamics.len();
+            // 开始的时候可以用 0
 
-        for card in tag_dynamics.cards.into_iter().filter_map(filter_map) {
-            dynamics.insert(card.desc.dynamic_id, card);
+            info!("获取 tag {} 第 {} 页", tag_name, times + 1);
+            tick.tick().await;
+            let tag_dynamics = TagFeedHistory::request(
+                &client.client,
+                TagFeedHistoryArgs {
+                    topic_name: tag_name.to_string(),
+                    offset_dynamic_id: offset,
+                },
+            )
+            .await?;
+
+            for card in tag_dynamics.cards.iter().cloned().filter_map(filter_map) {
+                dynamics.insert(card.desc.dynamic_id, card);
+            }
+
+            if let Some(last) = tag_dynamics.cards.last() {
+                offset = last.desc.dynamic_id.to_string();
+            } else {
+                break;
+            }
+
+            info!(
+                "tag {} 获取到 {} 条新动态",
+                tag_name,
+                dynamics.len() - original_size
+            );
         }
-        info!(
-            "tag {} got {} new dynamics.",
-            tag_name,
-            dynamics.len() - original_size
-        );
     }
     let mut dynamics: Vec<_> = dynamics.into_values().collect();
-    info!("got {} dynamics from all tags.", dynamics.len());
+    info!("所有tag中获取的总动态数量： {}", dynamics.len());
     dynamics.sort_unstable_by_key(|d| d.desc.timestamp);
 
     Ok(dynamics)
@@ -116,14 +116,14 @@ async fn run_once(client: &FeishuClient, pool: db::Pool) -> Result<()> {
     // 拉动态
     let dynamics = get_all_tags(client).await?;
     let dynamics = filter_new_dynamics(&pool, dynamics).await;
-    info!("new dynamics: {}", dynamics.len());
+    info!("没推送过的新动态: {} 条", dynamics.len());
 
     // 发送到飞书
     for dynamics in dynamics.chunks(10) {
         // 按批发送
         let mut items = vec![];
         for dynamic in dynamics {
-            info!("新动态：{}", dynamic.desc.dynamic_id);
+            info!("新动态 id= {}", dynamic.desc.dynamic_id);
             let body = biz::cards::dynamic_card(dynamic, client).await?;
             items.push((dynamic, body));
         }

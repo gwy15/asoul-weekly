@@ -259,6 +259,7 @@ dependencies = [
  "log4rs",
  "merge-images",
  "parking_lot",
+ "regex",
  "reqwest",
  "serde",
  "serde_json",

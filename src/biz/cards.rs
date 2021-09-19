@@ -2,6 +2,7 @@
 use anyhow::Result;
 use biliapi::requests::VideoInfo;
 use chrono_tz::Asia::Shanghai;
+use regex::Regex;
 use serde_json::Value;
 use std::borrow::Cow;
 
@@ -12,6 +13,10 @@ use crate::{biz, config::CONFIG, feishu::FeishuClient};
 type CardBody = Vec<Value>;
 
 fn markdown_escape(s: &str) -> Cow<str> {
+    lazy_static::lazy_static! {
+        static ref R: Regex = Regex::new("\n\\s+").unwrap();
+    }
+    let s = R.replace_all(s, "\n");
     if s.contains(|ch: char| matches!(ch, '[' | ']' | '(' | ')')) {
         let mut ans = String::new();
         for ch in s.chars() {
@@ -170,6 +175,7 @@ pub async fn dynamic_card(
         dynamic.desc.dynamic_id,
         markdown_escape(&dynamic.inner.description)
     );
+    debug!("dynamic content card markdown = {}", content_md);
 
     let img_key = get_dynamic_thumbnail_image_key(dynamic, client).await?;
 
@@ -222,6 +228,7 @@ pub async fn dynamic_card(
           ]
         }),
     ];
+    debug!("card = {}", serde_json::to_string(&b).unwrap());
     Ok(b)
 }
 
@@ -255,7 +262,7 @@ async fn get_dynamic_thumbnail_image_key(
     let merged_image_bytes = match merge_images::merge(&image_bytes) {
         Ok(bytes) => bytes,
         Err(e) => {
-            error!("合并图片失败：{:?}", e);
+            warn!("合并图片失败,使用fallback图片：{:?}", e);
             return Ok("img_v2_1f156161-3ffa-40f7-9d28-9621cc5ed2cg".to_string());
         }
     };
@@ -265,7 +272,7 @@ async fn get_dynamic_thumbnail_image_key(
         .upload_image_bytes(merged_image_bytes)
         .await
         .unwrap_or_else(|e| {
-            warn!("上传图片失败：{:?}", e);
+            warn!("上传图片失败，可能是过大：{:?}", e);
             debug!("使用默认图");
             "img_v2_1f156161-3ffa-40f7-9d28-9621cc5ed2cg".to_string()
         });
