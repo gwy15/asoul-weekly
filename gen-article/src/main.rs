@@ -345,10 +345,11 @@ async fn main() -> anyhow::Result<()> {
         .to_string();
 
     // 询问
-    let t = Utc::now() - chrono::Duration::days(1);
-    let date_utc8 = t.with_timezone(&chrono_tz::Asia::Shanghai).format("%m.%d");
+    let date_utc8 = Utc::now()
+        .with_timezone(&chrono_tz::Asia::Shanghai)
+        .format("%m 月 %d 日");
 
-    let summary = data(t).await?;
+    let summary = data(Utc::now() - chrono::Duration::days(1)).await?;
     // 发送草稿
     let draft = Draft {
         title: format!("枝江日报（{}）", date_utc8),

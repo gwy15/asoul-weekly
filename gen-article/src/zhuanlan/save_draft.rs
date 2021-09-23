@@ -50,7 +50,7 @@ impl Request for SaveDraft {
                 "list_id": 454181,// 枝江日报
                 "tid": 4,
                 "reprint": 0,
-                "tags": "A-SOUL,ASOUL,向晚,贝拉,珈乐,乃琳,嘉然",
+                "tags": "A-SOUL,ASOUL,向晚,贝拉,珈乐,乃琳,嘉然,虚拟偶像,虚拟主播",
                 "image_urls": "//i0.hdslb.com/bfs/article/663fca354ef2e3e34ae7fc09462f451e8ea6f36f.jpg",
                 "origin_image_urls": "http://article.biliimg.com/bfs/article/e5dc2802adfc60c171735576f10f767939919207.jpg",
                 "dynamic_intro": "",
