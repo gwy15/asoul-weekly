@@ -80,8 +80,25 @@ fn get_size(w: usize, h: usize) -> (usize, usize) {
 /// 返回版头，引言等
 fn header() -> Vec<Element> {
     vec![
+        Element::raw(strip(
+            r#"
+            <p style="text-align: center;">
+                <span class="color-gray-01 font-size-12">
+                一个魂们早上好呀！这里是枝江日报~本报旨在归纳前一天发生的A-SOUL相关各种咨询和二创内容，希望方便一个魂们快速浏览A-SOUL动态和二创内容。
+                </span>
+            </p>"#,
+        )),
+        Element::raw(strip(
+            r#"
+            <p style="text-align: center;">
+                <span class="color-gray-01 font-size-12">
+                B站功能提示：① 向左滑动/点击右下角菜单可以查看之前的日报；② 长按点赞按钮可以一键三连。
+                    </span>
+            </p>"#,
+        )),
         Element::spacer(),
         Element::block_quote(strip(r#"【替换这里为版头】"#)),
+        //
         // 成员动态
         Element::raw(strip(
             r#"
@@ -93,7 +110,24 @@ fn header() -> Vec<Element> {
         Element::spacer(),
         Element::block_quote(r#"【替换这里为成员动态】"#),
         Element::spacer(),
-        // 分割线
+        Element::raw(strip(
+            r#"
+            <figure class="img-box" contenteditable="false">
+            <img src="//i0.hdslb.com/bfs/article/02db465212d3c374a43c60fa2625cc1caeaab796.png" class="cut-off-6">
+            </figure>"#,
+        )),
+        //
+        // 直播动态
+        Element::raw(strip(
+            r#"
+            <figure class="img-box img-seamless" contenteditable="false">
+            <img src="//article.biliimg.com/bfs/article/843ea70a852bdea9a3536c456ff28376eaef9746.jpg" width="1280" height="600" data-size="86603" class="seamless" type="seamlessImage">
+            </figure>
+            "#,
+        )),
+        Element::spacer(),
+        Element::block_quote(r#"【替换这里为直播动态，如切片GIF等，没有直播就删掉】"#),
+        Element::spacer(),
         Element::raw(strip(
             r#"
             <figure class="img-box" contenteditable="false">
