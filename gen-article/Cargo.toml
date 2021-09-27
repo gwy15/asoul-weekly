@@ -36,5 +36,5 @@ reqwest_cookie_store = "0.2.0"
 winres = "0.1"
 
 [package.metadata.winres]
-OriginalFilename = "枝江晚报自动生成.exe"
+OriginalFilename = "枝江日报自动生成.exe"
 LegalCopyright = "Copyright 大头大头大 © 2021"
