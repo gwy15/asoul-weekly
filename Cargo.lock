@@ -898,7 +898,7 @@ dependencies = [
 
 [[package]]
 name = "gen-article"
-version = "0.1.7"
+version = "0.1.8"
 dependencies = [
  "anyhow",
  "asoul_weekly",
