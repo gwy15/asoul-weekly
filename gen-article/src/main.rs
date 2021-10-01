@@ -84,7 +84,7 @@ fn header() -> Vec<Element> {
             r#"
             <p style="text-align: center;">
                 <span class="color-gray-01 font-size-12">
-                一个魂们早上好呀！这里是枝江日报~本报旨在归纳前一天发生的A-SOUL相关各种咨询和二创内容，希望方便一个魂们快速浏览A-SOUL动态和二创内容。
+                一个魂们早上好呀！这里是枝江日报~本报旨在归纳前一天发生的A-SOUL相关各种资讯和二创内容，希望方便一个魂们快速浏览A-SOUL动态和二创内容。
                 </span>
             </p>"#,
         )),
