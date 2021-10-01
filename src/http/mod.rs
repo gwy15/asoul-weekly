@@ -1,10 +1,11 @@
+mod category;
 mod error;
 
 use std::collections::HashMap;
 
 use crate::{biz, db, FeishuClient};
 use actix_web::{
-    delete, get, patch, post,
+    get, post,
     web::{self, Json},
     App, HttpServer,
 };
@@ -62,46 +63,6 @@ async fn summary(
     Ok(Json(map))
 }
 
-#[derive(Debug, Deserialize)]
-struct Category {
-    category: String,
-}
-
-#[patch("/items/{id}/category")]
-async fn set_category(
-    id: web::Path<(String,)>,
-    data: web::Json<Category>,
-    db: web::Data<db::Pool>,
-) -> Result<Json<impl Serialize>> {
-    let id = id.into_inner().0;
-    info!("id = {}", id);
-    let category = data.into_inner().category;
-    info!("set category = {}", category);
-    if db::Item::from_id(&id, &db).await?.is_none() {
-        return Err(Error(anyhow!("数据库不存在 {} 的条目", id)));
-    }
-    db::Item::set_category(&id, &category, "HTTP API", &db).await?;
-    Ok(Json(json!({
-        "msg": "ok"
-    })))
-}
-
-#[delete("/items/{id}/category")]
-async fn remove_category(
-    id: web::Path<(String,)>,
-    db: web::Data<db::Pool>,
-) -> Result<Json<impl Serialize>> {
-    let id = id.into_inner().0;
-    info!("id = {}, remove category", id);
-    if db::Item::from_id(&id, &db).await?.is_none() {
-        return Err(Error(anyhow!("数据库不存在 {} 的条目", id)));
-    }
-    db::Item::remove_category(&id, &db).await?;
-    Ok(Json(json!({
-        "msg": "ok"
-    })))
-}
-
 #[get("/kpi")]
 async fn get_kpi(
     data: web::Query<DateQuery>,
@@ -143,9 +104,11 @@ pub async fn main(
         App::new()
             .service(callback)
             .service(summary)
-            .service(set_category)
-            .service(remove_category)
             .service(get_kpi)
+            .service(category::post_category)
+            .service(category::patch_category)
+            .service(category::remove_category)
+            .service(category::get_category)
             .app_data(db_pool.clone())
             .app_data(feishu_client.clone())
     })
