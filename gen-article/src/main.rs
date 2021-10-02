@@ -5,12 +5,12 @@ extern crate serde_json;
 #[macro_use]
 extern crate log;
 
+mod fetch_dynamics;
 mod login;
 mod zhuanlan;
 
 use anyhow::*;
 use biliapi::Request;
-use bilibili::tag_feed::*;
 use chrono::{DateTime, Utc};
 use log::*;
 use std::{
@@ -19,7 +19,7 @@ use std::{
 };
 
 use login::*;
-use zhuanlan::{cards::Cards, dynamic_detail::DynamicDetail, items::Element, save_draft::*};
+use zhuanlan::{cards::Cards, items::Element, save_draft::*};
 
 lazy_static::lazy_static! {
     static ref WEIGHT: HashMap<&'static str, i32> = maplit::hashmap!{
@@ -66,15 +66,6 @@ async fn data(t: DateTime<Utc>) -> Result<BTreeMap<String, Vec<String>>> {
     debug!("获取归档 {}", url);
     let r = reqwest::get(url).await?.json().await?;
     Ok(r)
-}
-
-fn get_size(w: usize, h: usize) -> (usize, usize) {
-    let (w, h) = (w as f64, h as f64);
-    // 宽高都最高 MAX_SIZE
-    let ratio = (MAX_SIZE as f64 / w).min(MAX_SIZE as f64 / h).min(1.0);
-    let ans = ((ratio * w) as usize, (ratio * h) as usize);
-    debug!("ratio = {:.2}, render size: {:?}", ratio, ans);
-    ans
 }
 
 /// 返回版头，引言等
@@ -270,78 +261,9 @@ async fn content(
     // 动态
     info!("{} 条动态", dynamics.len());
     elements.extend(dynamic_header());
-    for dynamic_url in dynamics {
-        let dynamic_id = dynamic_url.replace("https://t.bilibili.com/", "");
-        interval.tick().await;
-        info!("获取动态信息 {}", dynamic_url);
-        let info = match DynamicDetail::request(client, dynamic_id).await {
-            Ok(info) => info,
-            Err(e) => {
-                error!(
-                    "拉取动态信息失败，可能是已经删除了动态。动态链接: {}\n{:?}",
-                    dynamic_url, e
-                );
-                continue;
-            }
-        };
 
-        if info.card.desc.r#type != 2 {
-            warn!("dynamic type != 2, but = {}", info.card.desc.r#type);
-            continue;
-        }
-        let picture_dynamic = match serde_json::from_str::<PictureDynamic>(&info.card.inner) {
-            Ok(picture_dynamic) => Dynamic::<PictureDynamic> {
-                desc: info.card.desc,
-                inner: picture_dynamic,
-            },
-            Err(e) => {
-                warn!("type = 2，但是解析动态错误：{:?}", e);
-                continue;
-            }
-        };
-        info!(
-            "获取动态信息完成 {}，开始下载图片以获取图片大小信息",
-            dynamic_url
-        );
-        let uname = picture_dynamic.desc.user_profile.info.uname;
-        let pic_src = picture_dynamic.inner.pictures[0].src.clone();
-        debug!("图片链接：{}", pic_src);
-        // 获取图片大小
-        let r = client.get(&pic_src).send().await?;
-        if let Some(size) = r.content_length() {
-            if size > 1_000_000 {
-                info!(
-                    "图片大小：{:.2} MiB，可能需要下载一会儿",
-                    size as f64 / 1024. / 1024.
-                );
-            }
-        }
-        let pic = r.bytes().await?;
-        let (width, height) = match imagesize::blob_size(&pic) {
-            Ok(dim) => {
-                info!("动态 {} 图片大小：{:?}", dynamic_url, dim);
-                get_size(dim.width, dim.height)
-            }
-            Err(e) => {
-                warn!("无法获取图片大小: {:?}", e);
-                (MAX_SIZE, MAX_SIZE)
-            }
-        };
-        elements.push(Element::figure(
-            pic_src,
-            width,
-            height,
-            pic.len(),
-            "".to_string(),
-        ));
-        let raw = format!(
-            "<p style=\"text-align: right;\"><a href=\"{}\"><span class=\"color-gray-02 font-size-12\">↑ @{}（{}图）点我跳转原作品动态  &gt</span></a></p>",
-            dynamic_url,
-            uname,
-            picture_dynamic.inner.pictures.len()
-        );
-        elements.push(Element::raw(raw));
-    }
+    let dynamics_elements = fetch_dynamics::download_dynamics(dynamics, client).await?;
+    elements.extend(dynamics_elements);
 
     // 结束
     elements.extend(ending());

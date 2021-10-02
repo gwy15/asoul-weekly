@@ -898,7 +898,7 @@ dependencies = [
 
 [[package]]
 name = "gen-article"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "anyhow",
  "asoul_weekly",
@@ -907,6 +907,7 @@ dependencies = [
  "chrono",
  "chrono-tz",
  "cookie_store 0.15.0",
+ "futures",
  "git-version",
  "imagesize",
  "lazy_static",

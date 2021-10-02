@@ -1,6 +1,6 @@
 [package]
 name = "gen-article"
-version = "0.1.8"
+version = "0.1.9"
 edition = "2018"
 build = "build.rs"
 
@@ -11,6 +11,7 @@ bilibili = { path = "../bilibili", features = ["native-tls"] }
 log = "*"
 log4rs = "1.0.0"
 tokio = { version = "1", features = ["full"] }
+futures = "0.3.17"
 reqwest = { version = "0.11.4", default-features = false, features = ["json", "multipart"] }
 anyhow = "*"
 chrono = "0.4.19"
