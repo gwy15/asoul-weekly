@@ -195,6 +195,15 @@ fn ending() -> Vec<Element> {
             "#,
             ),
         },
+        Element::raw(strip(&format!(
+            r#"
+            <p style="text-align: right;">
+                <span class="color-gray-01 font-size-12">
+                {}
+                </span>
+            </p>"#,
+            env!("BUILD_INFO")
+        ))),
     ]
 }
 
@@ -343,10 +352,7 @@ async fn content(
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     println!("{}", README);
-    println!(
-        "自动生成枝江晚报，版本：{}\n",
-        std::env!("CARGO_PKG_VERSION")
-    );
+    println!("枝江日报生成程序 {}\n", std::env!("BUILD_INFO"));
     println!("扫码登录时如果二维码很丑，换个等宽字体");
 
     if log4rs::init_file("./log4rs.yml", Default::default()).is_err() {

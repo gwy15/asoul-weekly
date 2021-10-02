@@ -34,6 +34,9 @@ reqwest_cookie_store = "0.2.0"
 
 [build-dependencies]
 winres = "0.1"
+chrono = "0.4.19"
+chrono-tz = "0.5.3"
+git-version = "0.3.5"
 
 [package.metadata.winres]
 OriginalFilename = "枝江日报自动生成.exe"
