@@ -11,7 +11,7 @@ mod zhuanlan;
 
 use anyhow::*;
 use biliapi::Request;
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Datelike, Utc};
 use log::*;
 use std::{
     collections::{BTreeMap, HashMap},
@@ -273,6 +273,22 @@ async fn content(
     Ok(elements)
 }
 
+fn date_string(t: DateTime<Utc>) -> String {
+    let date_utc8 = t.with_timezone(&chrono_tz::Asia::Shanghai);
+    let date = date_utc8.format("%m 月 %d 日");
+    let weekday = match date_utc8.weekday() {
+        chrono::Weekday::Mon => "星期一",
+        chrono::Weekday::Tue => "星期二",
+        chrono::Weekday::Wed => "星期三",
+        chrono::Weekday::Thu => "星期四",
+        chrono::Weekday::Fri => "星期五",
+        chrono::Weekday::Sat => "星期六",
+        chrono::Weekday::Sun => "星期日",
+    };
+
+    format!("{} {}", date, weekday)
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     println!("{}", README);
@@ -308,15 +324,10 @@ async fn main() -> anyhow::Result<()> {
         .value()
         .to_string();
 
-    // 询问
-    let date_utc8 = Utc::now()
-        .with_timezone(&chrono_tz::Asia::Shanghai)
-        .format("%m 月 %d 日");
-
     let summary = data(Utc::now() - chrono::Duration::days(1)).await?;
     // 发送草稿
     let draft = Draft {
-        title: format!("枝江日报（{}）", date_utc8),
+        title: format!("枝江日报（{}）", date_string(Utc::now())),
         banner_url: "".to_string(),
         content: content(&client, summary).await?,
         summary: "一个简单的总结，点开草稿会自动重新生成".to_string(),
@@ -326,4 +337,11 @@ async fn main() -> anyhow::Result<()> {
     info!("saved draft aid = {}", r.aid);
 
     Ok(())
+}
+
+#[test]
+fn test_date() {
+    let t = DateTime::parse_from_rfc3339("2021-10-13T11:25:00+08:00").unwrap();
+    let t = t.with_timezone(&Utc);
+    assert_eq!(date_string(t), "10 月 13 日 星期三")
 }
