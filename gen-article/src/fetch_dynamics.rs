@@ -62,7 +62,11 @@ async fn download_and_save_picture(
 ) -> Result<(String, Bytes)> {
     debug!("下载并保存图片链接：{}", pic_src);
     // 获取图片大小
-    let r = client.get(&pic_src).send().await?;
+    let r = client
+        .get(&pic_src)
+        .send()
+        .await
+        .with_context(|| format!("error downloading the image from url {}", pic_src))?;
     if let Some(size) = r.content_length() {
         if size > 1_000_000 {
             info!(
