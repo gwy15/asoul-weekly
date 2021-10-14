@@ -4,6 +4,10 @@ use crate::MAX_SIZE;
 use anyhow::*;
 use biliapi::Request;
 use bilibili::tag_feed::*;
+use bytes::Bytes;
+use chrono::{DateTime, Utc};
+use regex::{Regex, RegexBuilder};
+use reqwest::Client;
 
 fn get_size(w: usize, h: usize) -> (usize, usize) {
     let (w, h) = (w as f64, h as f64);
@@ -14,41 +18,49 @@ fn get_size(w: usize, h: usize) -> (usize, usize) {
     ans
 }
 
-async fn get_dynamic(dynamic_url: String, client: reqwest::Client) -> Result<Vec<Element>> {
-    let dynamic_id = dynamic_url.replace("https://t.bilibili.com/", "");
-    info!("获取动态信息 {}", dynamic_url);
-    let info = match DynamicDetail::request(&client, dynamic_id).await {
-        Ok(info) => info,
-        Err(e) => {
-            error!(
-                "拉取动态信息失败，可能是已经删除了动态。动态链接: {}\n{:?}",
-                dynamic_url, e
-            );
-            return Ok(vec![]);
-        }
-    };
-
-    if info.card.desc.r#type != 2 {
-        warn!("dynamic type != 2, but = {}", info.card.desc.r#type);
-        return Ok(vec![]);
+async fn save_picture(
+    bytes: bytes::Bytes,
+    uname: &str,
+    dynamic_id: &str,
+    src: &str,
+    date: DateTime<Utc>,
+) -> Result<()> {
+    lazy_static::lazy_static! {
+        static ref EXT_PATTERN: Regex = RegexBuilder::new(r"\.(jpg|jpeg|bmp|webp|png|gif)$")
+            .case_insensitive(true)
+            .build().unwrap();
     }
-    let picture_dynamic = match serde_json::from_str::<PictureDynamic>(&info.card.inner) {
-        Ok(picture_dynamic) => Dynamic::<PictureDynamic> {
-            desc: info.card.desc,
-            inner: picture_dynamic,
-        },
-        Err(e) => {
-            warn!("type = 2，但是解析动态错误：{:?}", e);
-            return Ok(vec![]);
-        }
-    };
-    info!(
-        "获取动态信息完成 {}，开始下载图片以获取图片大小信息",
-        dynamic_url
-    );
-    let uname = picture_dynamic.desc.user_profile.info.uname;
-    let pic_src = picture_dynamic.inner.pictures[0].src.clone();
-    debug!("图片链接：{}", pic_src);
+    let ext = EXT_PATTERN
+        .captures(src)
+        .and_then(|cap| cap.get(1))
+        .map(|mat| mat.as_str())
+        .unwrap_or_else(|| {
+            info!("ext not found from src {}, using default jpg", src);
+            "jpg"
+        });
+
+    let filename = format!("{}.{}", dynamic_id, ext);
+    let path = format!("动态图片/{}/{}", date.format("%Y-%m-%d"), uname);
+    debug!("保存文件：path = {}, filename = {}", path, filename);
+    let fullpath = format!("{}/{}", path, filename);
+
+    use tokio::io::AsyncWriteExt;
+
+    tokio::fs::create_dir_all(&path).await?;
+    let mut f = tokio::fs::File::create(&fullpath).await?;
+    f.write_all(&bytes).await?;
+    info!("文件 {} 写入完成", fullpath);
+    Ok(())
+}
+
+async fn download_and_save_picture(
+    client: Client,
+    uname: String,
+    dynamic_id: String,
+    pic_src: String,
+    date: DateTime<Utc>,
+) -> Result<(String, Bytes)> {
+    debug!("下载并保存图片链接：{}", pic_src);
     // 获取图片大小
     let r = client.get(&pic_src).send().await?;
     if let Some(size) = r.content_length() {
@@ -59,8 +71,68 @@ async fn get_dynamic(dynamic_url: String, client: reqwest::Client) -> Result<Vec
             );
         }
     }
-    let pic = r.bytes().await?;
-    let (width, height) = match imagesize::blob_size(&pic) {
+    let pic_bytes = r.bytes().await?;
+    save_picture(pic_bytes.clone(), &uname, &dynamic_id, &pic_src, date).await?;
+    Ok((pic_src, pic_bytes))
+}
+
+async fn get_dynamic(
+    dynamic_url: String,
+    client: reqwest::Client,
+    date: DateTime<Utc>,
+) -> Result<(Vec<Element>, Vec<Bytes>)> {
+    let dynamic_id = dynamic_url.replace("https://t.bilibili.com/", "");
+    info!("获取动态信息 {}", dynamic_url);
+    let info = match DynamicDetail::request(&client, dynamic_id.clone()).await {
+        Ok(info) => info,
+        Err(e) => {
+            error!(
+                "拉取动态信息失败，可能是已经删除了动态。动态链接: {}\n{:?}",
+                dynamic_url, e
+            );
+            return Ok((vec![], vec![]));
+        }
+    };
+
+    if info.card.desc.r#type != 2 {
+        warn!("dynamic type != 2, but = {}", info.card.desc.r#type);
+        return Ok((vec![], vec![]));
+    }
+    let picture_dynamic = match serde_json::from_str::<PictureDynamic>(&info.card.inner) {
+        Ok(picture_dynamic) => Dynamic::<PictureDynamic> {
+            desc: info.card.desc,
+            inner: picture_dynamic,
+        },
+        Err(e) => {
+            warn!("type = 2，但是解析动态错误：{:?}", e);
+            return Ok((vec![], vec![]));
+        }
+    };
+    info!(
+        "获取动态信息完成 {}，开始下载图片以获取图片大小信息",
+        dynamic_url
+    );
+    let uname = picture_dynamic.desc.user_profile.info.uname;
+
+    let futures: Vec<_> = picture_dynamic
+        .inner
+        .pictures
+        .into_iter()
+        .map(|pic| {
+            download_and_save_picture(
+                client.clone(),
+                uname.clone(),
+                dynamic_id.clone(),
+                pic.src,
+                date,
+            )
+        })
+        .collect();
+    let pictures = futures::future::try_join_all(futures).await?;
+    let first_pic = pictures[0].clone();
+    let picture_bytes = pictures.into_iter().map(|p| p.1).collect::<Vec<_>>();
+
+    let (width, height) = match imagesize::blob_size(&first_pic.1) {
         Ok(dim) => {
             info!("动态 {} 图片大小：{:?}", dynamic_url, dim);
             get_size(dim.width, dim.height)
@@ -71,39 +143,46 @@ async fn get_dynamic(dynamic_url: String, client: reqwest::Client) -> Result<Vec
         }
     };
 
-    Ok(vec![
+    let elements = vec![
         Element::figure(
-            pic_src,
+            first_pic.0,
             width,
             height,
-            pic.len(),
+            first_pic.1.len(),
             "".to_string(),
         ),
         Element::raw(format!(
             "<p style=\"text-align: right;\"><a href=\"{}\"><span class=\"color-gray-02 font-size-12\">↑ @{}（{}图）点我跳转原作品动态  &gt</span></a></p>",
             dynamic_url,
             uname,
-            picture_dynamic.inner.pictures.len()
+            picture_bytes.len()
         ))
-    ])
+    ];
+
+    Ok((elements, picture_bytes))
 }
 
 pub async fn download_dynamics(
     dynamics: Vec<String>,
     client: &reqwest::Client,
-) -> Result<Vec<Element>> {
+    date: DateTime<Utc>,
+) -> Result<(Vec<Element>, Vec<Bytes>)> {
     info!("共计 {} 动态，开始并发下载", dynamics.len());
 
     let tasks: Vec<_> = dynamics
         .into_iter()
-        .map(move |url| async move { get_dynamic(url, client.clone()).await })
+        .map(move |url| async move { get_dynamic(url, client.clone(), date).await })
         .collect();
 
     let fut = futures::future::try_join_all(tasks);
-    let all_elements: Vec<Vec<_>> = fut.await?;
-    let elements = all_elements.into_iter().fold(vec![], |mut a, b| {
-        a.extend(b);
-        a
-    });
-    Ok(elements)
+    let all_elements: Vec<(Vec<Element>, Vec<Bytes>)> = fut.await?;
+    let (elements, images) = all_elements.into_iter().fold(
+        (vec![], vec![]),
+        |(mut elements, mut images), (sub_elements, img)| {
+            elements.extend(sub_elements);
+            images.extend(img);
+            (elements, images)
+        },
+    );
+    Ok((elements, images))
 }

@@ -200,8 +200,19 @@ fn ending() -> Vec<Element> {
     ]
 }
 
-async fn content(
+/// 生成动态缩略图并写入本地
+async fn generate_dynamic_images(images: Vec<bytes::Bytes>, date: DateTime<Utc>) -> Result<()> {
+    use tokio::io::AsyncWriteExt;
+    let image = merge_images::merge(&images)?;
+    let f = format!("动态图片/{}.jpg", date.format("%Y-%m-%d"));
+    let mut f = tokio::fs::File::create(f).await?;
+    f.write_all(&image).await?;
+    Ok(())
+}
+
+async fn gen_article_elements(
     client: &reqwest::Client,
+    date: DateTime<Utc>,
     mut summary: BTreeMap<String, Vec<String>>,
 ) -> Result<Vec<Element>> {
     let mut interval = tokio::time::interval(Duration::from_secs(1));
@@ -264,12 +275,15 @@ async fn content(
     info!("{} 条动态", dynamics.len());
     elements.extend(dynamic_header());
 
-    let dynamics_elements = fetch_dynamics::download_dynamics(dynamics, client).await?;
+    let (dynamics_elements, dynamic_images) =
+        fetch_dynamics::download_dynamics(dynamics, client, date).await?;
     elements.extend(dynamics_elements);
 
     // 结束
     elements.extend(ending());
 
+    // 生成动态图片
+    generate_dynamic_images(dynamic_images, date).await?;
     Ok(elements)
 }
 
@@ -324,12 +338,16 @@ async fn main() -> anyhow::Result<()> {
         .value()
         .to_string();
 
-    let summary = data(Utc::now() - chrono::Duration::days(1)).await?;
+    let date = Utc::now();
+
+    let summary = data(date - chrono::Duration::days(1)).await?;
+    let elements = gen_article_elements(&client, date, summary).await?;
+
     // 发送草稿
     let draft = Draft {
-        title: format!("枝江日报（{}）", date_string(Utc::now())),
+        title: format!("枝江日报（{}）", date_string(date)),
         banner_url: "".to_string(),
-        content: content(&client, summary).await?,
+        content: elements,
         summary: "一个简单的总结，点开草稿会自动重新生成".to_string(),
         csrf,
     };

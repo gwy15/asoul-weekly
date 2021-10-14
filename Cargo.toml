@@ -51,7 +51,7 @@ toml = "0.5.8"
 log = "*"
 log4rs = "1.0.0"
 
-biliapi = { version = "0.1.11", default-features = false }
+biliapi = { version = "0.1.12", default-features = false }
 chrono = "0.4.19"
 chrono-tz = "0.5.3"
 
