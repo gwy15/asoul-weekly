@@ -115,6 +115,7 @@ async fn run_once(client: &FeishuClient, pool: db::Pool) -> Result<()> {
 
     // 拉动态
     let dynamics = get_all_tags(client).await?;
+    info!("获取全部tag下的动态有 {} 条", dynamics.len());
     let dynamics = filter_new_dynamics(&pool, dynamics).await;
     info!("没推送过的新动态: {} 条", dynamics.len());
 

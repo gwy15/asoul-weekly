@@ -30,6 +30,7 @@ pub async fn persisted_client(
 
     let client = reqwest::ClientBuilder::new()
         .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36")
+        .timeout(std::time::Duration::from_secs(60))
         .cookie_provider(Arc::clone(&cookies))
         .build()?;
 

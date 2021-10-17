@@ -1,8 +1,8 @@
-use std::{collections::HashSet, sync::Arc};
+use std::{collections::HashSet, sync::Arc, time::Duration};
 
 use anyhow::{Context, Result};
 use parking_lot::RwLock;
-use reqwest::Client;
+use reqwest::{Client, ClientBuilder};
 use serde_json::Value;
 
 mod token_manager;
@@ -54,7 +54,10 @@ pub struct FeishuClient {
 impl FeishuClient {
     pub fn new(token: Arc<RwLock<String>>) -> Self {
         Self {
-            client: Client::new(),
+            client: ClientBuilder::new()
+                .timeout(Duration::from_secs(2 * 60))
+                .build()
+                .unwrap(),
             token,
         }
     }
