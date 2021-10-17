@@ -18,13 +18,12 @@ fn get_size(w: usize, h: usize) -> (usize, usize) {
     ans
 }
 
-async fn save_picture(
-    bytes: bytes::Bytes,
+fn picture_path(
     uname: &str,
     dynamic_id: &str,
     src: &str,
     date: DateTime<Utc>,
-) -> Result<()> {
+) -> Result<(String, String)> {
     lazy_static::lazy_static! {
         static ref EXT_PATTERN: Regex = RegexBuilder::new(r"\.(jpg|jpeg|bmp|webp|png|gif)$")
             .case_insensitive(true)
@@ -43,8 +42,18 @@ async fn save_picture(
     let path = format!("动态图片/{}/{}", date.format("%Y-%m-%d"), uname);
     debug!("保存文件：path = {}, filename = {}", path, filename);
     let fullpath = format!("{}/{}", path, filename);
+    Ok((path, fullpath))
+}
 
+async fn save_picture(
+    bytes: bytes::Bytes,
+    uname: &str,
+    dynamic_id: &str,
+    src: &str,
+    date: DateTime<Utc>,
+) -> Result<()> {
     use tokio::io::AsyncWriteExt;
+    let (path, fullpath) = picture_path(uname, dynamic_id, src, date)?;
 
     tokio::fs::create_dir_all(&path).await?;
     let mut f = tokio::fs::File::create(&fullpath).await?;
@@ -61,6 +70,7 @@ async fn download_and_save_picture(
     date: DateTime<Utc>,
 ) -> Result<(String, Bytes)> {
     debug!("下载并保存图片链接：{}", pic_src);
+
     // 获取图片大小
     let r = client
         .get(&pic_src)
@@ -122,6 +132,7 @@ async fn get_dynamic(
         .inner
         .pictures
         .into_iter()
+        // 下载全部图片/第一张图片
         .map(|pic| {
             download_and_save_picture(
                 client.clone(),
