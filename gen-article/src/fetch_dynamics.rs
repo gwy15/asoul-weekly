@@ -62,6 +62,36 @@ async fn save_picture(
     Ok(())
 }
 
+async fn download_and_save_picture_with_retry(
+    client: Client,
+    uname: String,
+    dynamic_id: String,
+    pic_src: String,
+    date: DateTime<Utc>,
+) -> Result<(String, Bytes)> {
+    for i in 0..3 {
+        let r = download_and_save_picture(
+            client.clone(),
+            uname.clone(),
+            dynamic_id.clone(),
+            pic_src.clone(),
+            date,
+        )
+        .await;
+        match r {
+            Ok(r) => return Ok(r),
+            Err(e) => {
+                warn!("下载失败，重试，已经失败 {} 次: {}", i, e);
+                if i == 2 {
+                    error!("下载失败");
+                    return Err(e);
+                }
+            }
+        }
+    }
+    unreachable!();
+}
+
 async fn download_and_save_picture(
     client: Client,
     uname: String,
@@ -76,7 +106,7 @@ async fn download_and_save_picture(
         .get(&pic_src)
         .send()
         .await
-        .with_context(|| format!("error downloading the image from url {}", pic_src))?;
+        .with_context(|| format!("error fetch header of the image from url {}", pic_src))?;
     if let Some(size) = r.content_length() {
         if size > 1_000_000 {
             info!(
@@ -85,7 +115,10 @@ async fn download_and_save_picture(
             );
         }
     }
-    let pic_bytes = r.bytes().await?;
+    let pic_bytes = r
+        .bytes()
+        .await
+        .with_context(|| format!("error downloading the image from url {}", pic_src))?;
     save_picture(pic_bytes.clone(), &uname, &dynamic_id, &pic_src, date).await?;
     Ok((pic_src, pic_bytes))
 }
@@ -134,7 +167,7 @@ async fn get_dynamic(
         .into_iter()
         // 下载全部图片/第一张图片
         .map(|pic| {
-            download_and_save_picture(
+            download_and_save_picture_with_retry(
                 client.clone(),
                 uname.clone(),
                 dynamic_id.clone(),
