@@ -11,7 +11,7 @@ pub struct TagVideos {
 #[derive(Debug, Deserialize, Clone)]
 pub struct TagNews {
     pub archives: Vec<VideoInfo>,
-    count: u64,
+    // count: u64,
 }
 
 impl Request for TagVideos {

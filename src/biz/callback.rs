@@ -9,8 +9,8 @@ use serde_json::Value;
 #[derive(Debug, Deserialize)]
 pub struct BindData {
     pub challenge: String,
-    token: String,
-    r#type: String,
+    // token: String,
+    // r#type: String,
 }
 
 /// 飞书对 action 传过来的数据
@@ -20,7 +20,7 @@ pub struct BindData {
 pub struct ActionData {
     open_message_id: String,
     user_id: String,
-    token: String,
+    // token: String,
     action: Action,
 }
 
@@ -36,14 +36,16 @@ enum Action {
 #[derive(Debug, Deserialize)]
 struct SelectAction {
     option: String,
-    tag: String,
+    // #[allow(unused)]
+    // tag: String,
     value: HashMap<String, String>,
 }
 
 /// 按钮的 action
 #[derive(Debug, Deserialize)]
 struct ButtonAction {
-    tag: String,
+    // #[allow(unused)]
+    // tag: String,
     value: HashMap<String, String>,
 }
 
