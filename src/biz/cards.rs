@@ -238,7 +238,10 @@ async fn get_dynamic_thumbnail_image_key(
 ) -> Result<String> {
     // 进行一个贴图的上传
     let mut image_download_futures = vec![];
-    async fn download_image(client: &FeishuClient, url: String) -> Result<Vec<u8>> {
+    async fn download_image(client: &FeishuClient, mut url: String) -> Result<Vec<u8>> {
+        if !url.ends_with(".@512w.jpg") {
+            url.push_str(".@512w.jpg");
+        }
         let bytes = client.client.get(url).send().await?.bytes().await?;
         Ok(bytes.to_vec())
     }
