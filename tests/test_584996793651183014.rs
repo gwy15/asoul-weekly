@@ -28,7 +28,7 @@ async fn test_584996793651183014() -> Result<()> {
         Ok(bytes.to_vec())
     }
 
-    let client = biliapi::connection::new_client().unwrap();
+    // let client = biliapi::connection::new_client().unwrap();
 
     for url in URLS {
         image_download_futures.push(download_image(url.to_string()));
@@ -46,7 +46,7 @@ async fn test_584996793651183014() -> Result<()> {
         image_bytes.iter().map(|i| i.len()).sum::<usize>() as f64 / 1024. / 1024.
     );
 
-    let merged_image_bytes = match merge_images::merge(&image_bytes) {
+    let _merged_image_bytes = match merge_images::merge(&image_bytes) {
         Ok(bytes) => bytes,
         Err(e) => {
             warn!("合并图片失败,使用fallback图片：{:?}", e);
