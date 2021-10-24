@@ -1,10 +1,10 @@
 # build
 FROM rust:slim-buster as builder
 WORKDIR /code
-COPY . .
 ENV SQLX_OFFLINE=1
 RUN apt update \
     && apt-get install -y clang libclang-dev lld libopencv-dev
+COPY . .
 RUN cargo b --release --no-default-features --features rustls --bin asoul_weekly \
     && strip target/release/asoul_weekly
 
@@ -15,7 +15,7 @@ RUN cargo b --release --no-default-features --features rustls --bin asoul_weekly
 FROM debian:buster-slim
 WORKDIR /code
 RUN apt update \
-    && apt-get install -y libopencv-core-dev libopencv-imgproc-dev libopencv-imgcodecs-dev \
+    && apt-get install -y libopencv-core-dev libopencv-imgproc-dev libopencv-imgcodecs-dev libopencv-features2d-dev \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /code/target/release/asoul_weekly .

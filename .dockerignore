@@ -1,5 +1,6 @@
 target
 logs
+动态图片
 
 .dockerignore
 Dockerfile
