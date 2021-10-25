@@ -2,8 +2,10 @@
 FROM rust:slim-bullseye as builder
 WORKDIR /code
 ENV SQLX_OFFLINE=1
-RUN apt update \
-    && apt-get install -y libopencv-core-dev libopencv-imgproc-dev libopencv-imgcodecs-dev
+RUN apt-get update \
+    && apt-get install -y \
+        libopencv-dev \
+        libclang-dev
 
 COPY . .
 RUN cargo b --release --no-default-features --features rustls --bin asoul_weekly \
