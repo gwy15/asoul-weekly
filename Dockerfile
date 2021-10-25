@@ -5,7 +5,7 @@ ENV SQLX_OFFLINE=1
 RUN apt-get update \
     && apt-get install -y \
         libopencv-dev \
-        libclang-dev
+        clang libclang-dev
 
 COPY . .
 RUN cargo b --release --no-default-features --features rustls --bin asoul_weekly \

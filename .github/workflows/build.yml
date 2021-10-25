@@ -21,7 +21,7 @@ jobs:
       - name: Install OpenCV
         run: |
           sudo apt-get update
-          sudo apt-get install -y libopencv-dev libclang-dev
+          sudo apt-get install -y libopencv-dev clang libclang-dev
       - uses: Swatinem/rust-cache@v1
       - name: Build
         run: |
