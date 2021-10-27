@@ -1,21 +1,23 @@
 # build
-FROM rust:slim-buster as builder
+FROM rust:slim-bullseye as builder
 WORKDIR /code
 ENV SQLX_OFFLINE=1
-RUN apt update \
-    && apt-get install -y clang libclang-dev lld libopencv-dev
+RUN apt-get update \
+    && apt-get install -y \
+        libopencv-dev \
+        clang libclang-dev
+
 COPY . .
 RUN cargo b --release --no-default-features --features rustls --bin asoul_weekly \
-    && strip target/release/asoul_weekly
-
-# ENTRYPOINT [ "bash" ]
-# CMD []
+    && strip target/release/asoul_weekly \
+    && echo "Required dynamic libraries: " \
+    && ldd target/release/asoul_weekly
 
 # 
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 WORKDIR /code
 RUN apt update \
-    && apt-get install -y libopencv-core-dev libopencv-imgproc-dev libopencv-imgcodecs-dev libopencv-features2d-dev \
+    && apt-get install -y libopencv-core4.5 libopencv-imgproc4.5 libopencv-imgcodecs4.5 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /code/target/release/asoul_weekly .

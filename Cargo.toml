@@ -10,10 +10,10 @@ members = [
     "bilibili"
 ]
 
-# 不优化体积了，加速编译
-# [profile.release]
-# lto = true
-# codegen-units = 1
+# release 的时候加上 LTO，这样编译出来的产物不会依赖其他的 opencv 动态链接库
+[profile.release]
+lto = true
+
 
 [profile.dev]
 # Disabling debug info speeds up builds a bunch,
