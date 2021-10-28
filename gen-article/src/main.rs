@@ -163,6 +163,18 @@ fn dynamic_header() -> Vec<Element> {
 }
 
 fn ending() -> Vec<Element> {
+    fn footnote(text: &str) -> Element {
+        Element::raw(strip(&format!(
+            r#"
+            <p style="text-align: right;">
+                <span class="color-gray-01 font-size-12">
+                {}
+                </span>
+            </p>"#,
+            text
+        )))
+    }
+
     vec![
         // 分割线
         Element::raw(strip(
@@ -175,7 +187,7 @@ fn ending() -> Vec<Element> {
             center: true,
             strong: false,
             classes: vec!["font-size-16".to_string()],
-            text: "以上就是本期日报的全部内容！".to_string(),
+            text: "以上就是本期日报的全部内容啦！".to_string(),
         },
         Element::Text {
             center: false,
@@ -183,20 +195,14 @@ fn ending() -> Vec<Element> {
             classes: vec!["font-size-16".to_string()],
             text: strip(
                 r#"
-                由于专栏格式所限，部分优秀二创内容无法展示完全。欢迎一个魂们踊跃向周报组投稿自己的内容。
-                如果对枝江日报这个栏目有什么好的意见和建议可以通过私信直接向我们反馈，我们也深知目前还有很多不完善和需要改进的地方，会努力越做越好的！
+                受B站专栏格式和人力限制，部分优秀二创内容无法展示完全。如果您看到有任何我们遗漏的内容，欢迎一个魂们踊跃向 @ASOUL周报 投稿内容！
+                如果对枝江日报有什么好的意见和建议也可以通过私信直接向我们反馈，我们也深知目前还有很多不完善和需要改进的地方，会努力越做越好的！
             "#,
             ),
         },
-        Element::raw(strip(&format!(
-            r#"
-            <p style="text-align: right;">
-                <span class="color-gray-01 font-size-12">
-                {}
-                </span>
-            </p>"#,
-            env!("BUILD_INFO")
-        ))),
+        footnote(&format!("自动化：asoul-weekly {}", env!("BUILD_INFO"))),
+        footnote("编辑：@大头大头大 | 二创筛选：@SkyBigBlack"),
+        footnote("日报文案：     |  GIF制作：  "),
     ]
 }
 
