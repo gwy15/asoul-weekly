@@ -202,7 +202,7 @@ fn ending() -> Vec<Element> {
         },
         footnote(&format!("自动化：asoul-weekly {}", env!("BUILD_INFO"))),
         footnote("编辑：@大头大头大 | 二创筛选：@SkyBigBlack"),
-        footnote("日报文案：     |  GIF制作：  "),
+        footnote("日报文案：【】|  GIF制作：【】"),
     ]
 }
 
@@ -210,7 +210,12 @@ fn ending() -> Vec<Element> {
 async fn generate_dynamic_images(images: Vec<bytes::Bytes>, date: DateTime<Utc>) -> Result<()> {
     use tokio::io::AsyncWriteExt;
     let image = merge_images::merge(&images)?;
-    let f = format!("动态图片/{}.jpg", date.format("%Y-%m-%d"));
+    let f = format!("动态图片/{}-grid.jpg", date.format("%Y-%m-%d"));
+    let mut f = tokio::fs::File::create(f).await?;
+    f.write_all(&image).await?;
+
+    let image = merge_images::waterfall(&images)?;
+    let f = format!("动态图片/{}-waterfall.jpg", date.format("%Y-%m-%d"));
     let mut f = tokio::fs::File::create(f).await?;
     f.write_all(&image).await?;
     Ok(())
