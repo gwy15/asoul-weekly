@@ -1,3 +1,4 @@
+# bullseye 才有 opencv 4.5； 4.2及以前有一个bug（imdecode 不识别 flags）
 # build
 FROM rust:slim-bullseye as builder
 WORKDIR /code
@@ -17,7 +18,7 @@ RUN cargo b --release --no-default-features --features rustls --bin asoul_weekly
 FROM debian:bullseye-slim
 WORKDIR /code
 RUN apt update \
-    && apt-get install -y libopencv-core4.5 libopencv-imgproc4.5 libopencv-imgcodecs4.5 \
+    && apt-get install -y libopencv-core4.5 libopencv-imgproc4.5 libopencv-imgcodecs4.5 libopencv-videoio4.5 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /code/target/release/asoul_weekly .

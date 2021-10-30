@@ -1330,11 +1330,12 @@ checksum = "308cc39be01b73d0d18f82a0e7b2a3df85245f84af96fdddc5d202d27e47b86a"
 [[package]]
 name = "merge-images"
 version = "0.1.1"
-source = "git+https://github.com/gwy15/merge-images#5a70a1d027282976f97b1f9c6174f9eddc70439a"
+source = "git+https://github.com/gwy15/merge-images#42889797f426be92c740e4282a9f9888f048d77e"
 dependencies = [
  "imagesize",
  "log",
  "opencv",
+ "tempfile",
 ]
 
 [[package]]
