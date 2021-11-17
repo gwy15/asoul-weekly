@@ -8,6 +8,7 @@ use bytes::Bytes;
 use chrono::{DateTime, Utc};
 use regex::{Regex, RegexBuilder};
 use reqwest::Client;
+use tokio::io::AsyncReadExt;
 
 fn get_size(w: usize, h: usize) -> (usize, usize) {
     let (w, h) = (w as f64, h as f64);
@@ -45,6 +46,20 @@ fn picture_path(
     Ok((path, fullpath))
 }
 
+async fn load_local_picture(
+    uname: &str,
+    dynamic_id: &str,
+    src: &str,
+    date: DateTime<Utc>,
+) -> Result<Bytes> {
+    let (_path, fullpath) = picture_path(uname, dynamic_id, src, date)?;
+
+    let mut f = tokio::fs::File::open(&fullpath).await?;
+    let mut buf = vec![];
+    f.read_to_end(&mut buf).await?;
+    Ok(bytes::Bytes::copy_from_slice(&buf))
+}
+
 async fn save_picture(
     bytes: bytes::Bytes,
     uname: &str,
@@ -62,6 +77,7 @@ async fn save_picture(
     Ok(())
 }
 
+/// return (pic_src, bytes)
 async fn download_and_save_picture_with_retry(
     client: Client,
     uname: String,
@@ -79,7 +95,7 @@ async fn download_and_save_picture_with_retry(
         )
         .await;
         match r {
-            Ok(r) => return Ok(r),
+            Ok(r) => return Ok((pic_src, r)),
             Err(e) => {
                 warn!("下载失败，重试，已经失败 {} 次: {}", i, e);
                 if i == 2 {
@@ -98,8 +114,13 @@ async fn download_and_save_picture(
     dynamic_id: String,
     pic_src: String,
     date: DateTime<Utc>,
-) -> Result<(String, Bytes)> {
+) -> Result<Bytes> {
     debug!("下载并保存图片链接：{}", pic_src);
+
+    if let Ok(bytes) = load_local_picture(&uname, &dynamic_id, &pic_src, date).await {
+        info!("图片已在本地存在，跳过下载");
+        return Ok(bytes);
+    }
 
     // 获取图片大小
     let r = client
@@ -120,7 +141,7 @@ async fn download_and_save_picture(
         .await
         .with_context(|| format!("error downloading the image from url {}", pic_src))?;
     save_picture(pic_bytes.clone(), &uname, &dynamic_id, &pic_src, date).await?;
-    Ok((pic_src, pic_bytes))
+    Ok(pic_bytes)
 }
 
 async fn get_dynamic(
@@ -171,7 +192,7 @@ async fn get_dynamic(
                 client.clone(),
                 uname.clone(),
                 dynamic_id.clone(),
-                pic.src,
+                pic.src.clone(),
                 date,
             )
         })
