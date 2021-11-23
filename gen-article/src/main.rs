@@ -365,6 +365,12 @@ async fn main() -> anyhow::Result<()> {
     let r = SaveDraft::request(&client, draft).await?;
     info!("saved draft aid = {}", r.aid);
 
+    notify_rust::Notification::new()
+        .summary("枝江日报")
+        .body(&format!("草稿生成完成, aid = {}", r.aid))
+        .icon("firefox")
+        .show()?;
+
     Ok(())
 }
 
