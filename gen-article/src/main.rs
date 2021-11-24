@@ -23,7 +23,8 @@ use zhuanlan::{cards::Cards, items::Element, save_draft::*};
 
 lazy_static::lazy_static! {
     static ref WEIGHT: HashMap<&'static str, i32> = maplit::hashmap!{
-        "珈乐生日祝贺" => -1,
+        "A-SOUL一周年庆祝" => -2,
+        "乃琳50万粉祝贺" => -1,
         "音乐" => 0,
         "舞蹈" => 1,
         "手书" => 2,
