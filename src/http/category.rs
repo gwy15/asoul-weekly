@@ -51,9 +51,9 @@ async fn get_category(
     let id = id.into_inner().0;
     info!("get category: id = {}", id);
     match db::Item::from_id(&id, &pool).await? {
-        Some(item) => Ok(Json(Category {
-            category: item.category.unwrap_or_else(|| "<unset>".to_string()),
-        })),
+        Some(item) => Ok(Json(json!({
+            "category": item.category
+        }))),
         None => Err(anyhow!("数据库不存在该条目").into()),
     }
 }
