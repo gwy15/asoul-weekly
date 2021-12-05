@@ -310,7 +310,7 @@ fn date_string(t: DateTime<Utc>) -> String {
     format!("{} {}", date, weekday)
 }
 
-pub async fn generate(client: reqwest::Client, csrf: String) -> Result<()> {
+pub async fn generate(client: reqwest::Client, csrf: String) -> Result<SaveDraft> {
     let date = Utc::now();
 
     let summary = get_data(date - chrono::Duration::days(1)).await?;
@@ -334,7 +334,7 @@ pub async fn generate(client: reqwest::Client, csrf: String) -> Result<()> {
         .icon("firefox")
         .show()?;
 
-    Ok(())
+    Ok(r)
 }
 
 #[test]
