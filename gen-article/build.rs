@@ -8,7 +8,7 @@ fn save_build_info() {
         .format("%Y-%m-%d %H:%M:%S")
         .to_string();
     let version = env!("CARGO_PKG_VERSION");
-    let hash = git_version::git_version!();
+    let hash = git_version::git_version!(fallback = "unknown");
 
     let build_info = format!("v{}-{}-{}", version, hash, date);
 
