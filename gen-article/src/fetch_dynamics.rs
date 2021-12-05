@@ -189,10 +189,11 @@ async fn get_dynamic(
     );
     let uname = picture_dynamic.desc.user_profile.info.uname;
 
-    let futures: Vec<_> = picture_dynamic
-        .inner
-        .pictures
-        .into_iter()
+    let iter = picture_dynamic.inner.pictures.into_iter();
+    #[cfg(not(feature = "thumbnail"))]
+    let iter = iter.take(1);
+
+    let futures: Vec<_> = iter
         // 下载全部图片/第一张图片
         .map(|pic| {
             download_and_save_picture_with_retry(
@@ -206,7 +207,10 @@ async fn get_dynamic(
         .collect();
     let pictures = futures::future::try_join_all(futures).await?;
     let first_pic = pictures[0].clone();
+    #[cfg(feature = "thumbnail")]
     let picture_bytes = pictures.into_iter().map(|p| p.1).collect::<Vec<_>>();
+    #[cfg(not(feature = "thumbnail"))]
+    let picture_bytes = vec![];
 
     let (width, height) = match imagesize::blob_size(&first_pic.1) {
         Ok(dim) => {
