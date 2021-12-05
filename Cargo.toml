@@ -10,14 +10,11 @@ members = [
     "bilibili"
 ]
 
-# release 的时候加上 LTO，这样编译出来的产物不会依赖其他的 opencv 动态链接库
 [profile.release]
+# release 的时候加上 LTO，这样编译出来的产物不会依赖其他的 opencv 动态链接库
 lto = true
 
-
 [profile.dev]
-# Disabling debug info speeds up builds a bunch,
-# and we don't rely on it for debugging that much.
 debug = 0
 
 [[bin]]
@@ -26,8 +23,18 @@ path = "bin/print_group.rs"
 
 [features]
 default = ["native-tls"]
-native-tls = ["reqwest/native-tls", "sqlx/runtime-actix-native-tls", "biliapi/native-tls", "biliapi/native-tls"]
-rustls = ["reqwest/rustls-tls", "sqlx/runtime-actix-rustls", "biliapi/rustls", "biliapi/rustls"]
+native-tls = [
+    "reqwest/native-tls",
+    "sqlx/runtime-actix-native-tls",
+    "biliapi/native-tls",
+    "biliapi/native-tls",
+]
+rustls = [
+    "reqwest/rustls-tls",
+    "sqlx/runtime-actix-rustls",
+    "biliapi/rustls",
+    "biliapi/rustls",
+]
 # 是否发送归档信息
 send-archive = []
 
@@ -61,7 +68,6 @@ regex = "1.5.4"
 
 # 拼图
 merge-images = { version = "*", git = "https://github.com/gwy15/merge-images" }
-# merge-images = { version = "*", path = "../merge-images" }
 
 [dev-dependencies]
 pretty_env_logger = "0.4.0"
