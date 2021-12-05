@@ -18,7 +18,8 @@ fn save_build_info() {
 fn main() {
     save_build_info();
 
-    if cfg!(target_os = "windows") {
+    #[cfg(target_os = "windows")]
+    {
         let mut res = winres::WindowsResource::new();
         res.set_icon("icon.ico");
         res.compile().unwrap();
