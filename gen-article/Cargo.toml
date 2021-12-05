@@ -5,7 +5,6 @@ edition = "2018"
 build = "build.rs"
 
 [dependencies]
-asoul_weekly = { version = "*", path = ".." }
 bilibili = { path = "../bilibili", features = ["native-tls"] }
 
 log = "*"
@@ -35,7 +34,6 @@ reqwest_cookie_store = "0.2.0"
 # 生成二创图片
 bytes = "1.1.0"
 merge-images = { version = "*", git = "https://github.com/gwy15/merge-images" }
-# merge-images = { version = "*", path = "../../merge-images" }
 notify-rust = "4"
 
 [build-dependencies]

@@ -3,6 +3,7 @@
 use biliapi::{requests::BiliResponseExt, Request};
 use reqwest::multipart;
 
+#[allow(unused)]
 #[derive(Debug, Deserialize)]
 pub struct UploadImage {
     size: usize,

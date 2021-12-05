@@ -1003,7 +1003,6 @@ name = "gen-article"
 version = "0.1.15"
 dependencies = [
  "anyhow",
- "asoul_weekly",
  "biliapi",
  "bilibili",
  "bytes",
