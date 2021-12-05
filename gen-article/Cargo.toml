@@ -4,8 +4,15 @@ version = "0.1.15"
 edition = "2018"
 build = "build.rs"
 
+[features]
+# default = [ "native-tls", "thumbnail" ]
+default = []
+native-tls = [ "bilibili/native-tls", "biliapi/native-tls" ]
+rustls = [ "bilibili/rustls", "biliapi/rustls" ]
+thumbnail = [ "merge-images" ]
+
 [dependencies]
-bilibili = { path = "../bilibili", features = ["native-tls"] }
+bilibili = { path = "../bilibili", default-features = false }
 
 log = "*"
 log4rs = "1.0.0"
@@ -15,7 +22,7 @@ reqwest = { version = "0.11.4", default-features = false, features = ["json", "m
 anyhow = "*"
 chrono = "0.4.19"
 chrono-tz = "0.5.3"
-biliapi = { version = "0.1.11", features = ["native-tls"] }
+biliapi = { version = "0.1.11", default-features = false }
 serde = { version = "1", features = ["derive"] }
 serde_json = "*"
 
@@ -33,14 +40,18 @@ reqwest_cookie_store = "0.2.0"
 
 # 生成二创图片
 bytes = "1.1.0"
-merge-images = { version = "*", git = "https://github.com/gwy15/merge-images" }
-notify-rust = "4"
+merge-images = { version = "*", git = "https://github.com/gwy15/merge-images", optional = true }
 
 [build-dependencies]
-winres = "0.1"
 chrono = "0.4.19"
 chrono-tz = "0.5.3"
 git-version = "0.3.5"
+
+[target.'cfg(windows)'.dependencies]
+notify-rust = "4"
+
+[target.'cfg(windows)'.build-dependencies]
+winres = "0.1"
 
 [package.metadata.winres]
 OriginalFilename = "枝江日报自动生成.exe"

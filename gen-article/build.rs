@@ -1,3 +1,4 @@
+#[cfg(target_os = "windows")]
 extern crate winres;
 
 /// 保存 build date 和 hash 到 BUILD_INFO 环境变量

@@ -199,7 +199,8 @@ fn ending() -> Vec<Element> {
 }
 
 /// 生成动态缩略图并写入本地
-async fn generate_dynamic_images(images: Vec<bytes::Bytes>, date: DateTime<Utc>) -> Result<()> {
+#[cfg(feature = "thumbnail")]
+async fn generate_dynamic_thumbnail(images: Vec<bytes::Bytes>, date: DateTime<Utc>) -> Result<()> {
     use tokio::io::AsyncWriteExt;
     let image = merge_images::merge(&images)?;
     let f = format!("动态图片/{}-grid.jpg", date.format("%Y-%m-%d"));
@@ -278,6 +279,7 @@ async fn gen_article_elements(
     info!("{} 条动态", dynamics.len());
     elements.extend(dynamic_header());
 
+    #[allow(unused)]
     let (dynamics_elements, dynamic_images) =
         fetch_dynamics::download_dynamics(dynamics, client, date).await?;
     elements.extend(dynamics_elements);
@@ -286,7 +288,9 @@ async fn gen_article_elements(
     elements.extend(ending());
 
     // 生成动态图片
-    generate_dynamic_images(dynamic_images, date).await?;
+    #[cfg(feature = "thumbnail")]
+    generate_dynamic_thumbnail(dynamic_images, date).await?;
+
     Ok(elements)
 }
 

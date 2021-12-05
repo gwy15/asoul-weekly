@@ -6,9 +6,7 @@ use biliapi::Request;
 use bilibili::tag_feed::*;
 use bytes::Bytes;
 use chrono::{DateTime, Utc};
-use regex::{Regex, RegexBuilder};
 use reqwest::Client;
-use tokio::io::AsyncReadExt;
 
 fn get_size(w: usize, h: usize) -> (usize, usize) {
     let (w, h) = (w as f64, h as f64);
@@ -19,12 +17,14 @@ fn get_size(w: usize, h: usize) -> (usize, usize) {
     ans
 }
 
+#[cfg(feature = "thumbnail")]
 fn picture_path(
     uname: &str,
     dynamic_id: &str,
     src: &str,
     date: DateTime<Utc>,
 ) -> Result<(String, String)> {
+    use regex::{Regex, RegexBuilder};
     lazy_static::lazy_static! {
         static ref EXT_PATTERN: Regex = RegexBuilder::new(r"\.(jpg|jpeg|bmp|webp|png|gif)$")
             .case_insensitive(true)
@@ -46,22 +46,25 @@ fn picture_path(
     Ok((path, fullpath))
 }
 
+#[cfg(feature = "thumbnail")]
 async fn load_local_picture(
     uname: &str,
     dynamic_id: &str,
     src: &str,
     date: DateTime<Utc>,
 ) -> Result<Bytes> {
+    use tokio::io::AsyncReadExt;
     let (_path, fullpath) = picture_path(uname, dynamic_id, src, date)?;
 
     let mut f = tokio::fs::File::open(&fullpath).await?;
     let mut buf = vec![];
     f.read_to_end(&mut buf).await?;
-    Ok(bytes::Bytes::copy_from_slice(&buf))
+    Ok(Bytes::copy_from_slice(&buf))
 }
 
+#[cfg(feature = "thumbnail")]
 async fn save_picture(
-    bytes: bytes::Bytes,
+    bytes: Bytes,
     uname: &str,
     dynamic_id: &str,
     src: &str,
@@ -110,13 +113,14 @@ async fn download_and_save_picture_with_retry(
 
 async fn download_and_save_picture(
     client: Client,
-    uname: String,
-    dynamic_id: String,
+    #[allow(unused)] uname: String,
+    #[allow(unused)] dynamic_id: String,
     pic_src: String,
-    date: DateTime<Utc>,
+    #[allow(unused)] date: DateTime<Utc>,
 ) -> Result<Bytes> {
     debug!("下载并保存图片链接：{}", pic_src);
 
+    #[cfg(feature = "thumbnail")]
     if let Ok(bytes) = load_local_picture(&uname, &dynamic_id, &pic_src, date).await {
         info!("图片已在本地存在，跳过下载");
         return Ok(bytes);
@@ -140,7 +144,10 @@ async fn download_and_save_picture(
         .bytes()
         .await
         .with_context(|| format!("error downloading the image from url {}", pic_src))?;
+
+    #[cfg(feature = "thumbnail")]
     save_picture(pic_bytes.clone(), &uname, &dynamic_id, &pic_src, date).await?;
+
     Ok(pic_bytes)
 }
 
