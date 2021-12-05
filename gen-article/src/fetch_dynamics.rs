@@ -199,7 +199,7 @@ async fn get_dynamic(
                 client.clone(),
                 uname.clone(),
                 dynamic_id.clone(),
-                pic.src.clone(),
+                pic.src,
                 date,
             )
         })
