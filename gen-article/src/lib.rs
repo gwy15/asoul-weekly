@@ -5,6 +5,7 @@ extern crate serde_json;
 #[macro_use]
 extern crate log;
 
+mod download_image;
 mod fetch_dynamics;
 mod login;
 mod zhuanlan;
