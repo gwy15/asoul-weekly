@@ -12,7 +12,8 @@ mod zhuanlan;
 
 use anyhow::*;
 use biliapi::Request;
-use chrono::{DateTime, Datelike, Utc};
+use chrono::{DateTime, Datelike, NaiveDate, TimeZone, Utc};
+use chrono_tz::Asia::Shanghai;
 use log::*;
 use std::{
     collections::{BTreeMap, HashMap},
@@ -64,8 +65,8 @@ async fn get_data(t: DateTime<Utc>) -> Result<BTreeMap<String, Vec<String>>> {
 }
 
 /// 返回版头，引言等
-fn header() -> Vec<Element> {
-    vec![
+fn header(date: DateTime<Utc>) -> Vec<Element> {
+    let mut ret = vec![
         Element::raw(strip(
             r#"
             <p style="text-align: center;">
@@ -84,6 +85,27 @@ fn header() -> Vec<Element> {
         )),
         Element::spacer(),
         Element::block_quote(strip(r#"【替换这里为版头】"#)),
+    ];
+
+    // 提醒二创参与
+    let today = date.with_timezone(&Shanghai).date();
+    let event_end = Shanghai.from_utc_date(&NaiveDate::from_ymd(2022, 1, 5));
+    let event_remain = (event_end - today).num_days();
+    info!("二创激励计划还有 {} 天", event_remain);
+    if event_remain > 0 {
+        ret.extend([
+            Element::raw(strip(
+                &format!(
+                r#"
+                <p style="text-align: center;">二创作者记得带上tag <strong><span class="color-yellow-04">#A-SOUL二创激励计划#</span></strong>&nbsp;参与活动</p>
+                <p style="text-align: center;">活动将于&nbsp;2022年1月5日（{}天后）结束</p>
+                <figure class="img-box" contenteditable="false"><img src="//article.biliimg.com/bfs/article/card/70584df3f930b1869475527a9e0fe347499dcb98.png" width="1320" height="224" data-size="33777" aid="13871002" class="article-card" type="normal"></figure><p><br></p>
+                "#, event_remain)
+            )),
+        ]);
+    }
+
+    ret.extend([
         //
         // 成员动态
         Element::raw(strip(
@@ -120,7 +142,9 @@ fn header() -> Vec<Element> {
             <img src="//i0.hdslb.com/bfs/article/02db465212d3c374a43c60fa2625cc1caeaab796.png" class="cut-off-6">
             </figure>"#,
         )),
-    ]
+    ]);
+
+    ret
 }
 
 /// 视频分版头
@@ -194,7 +218,7 @@ fn ending() -> Vec<Element> {
             ),
         },
         footnote(&format!("自动化：asoul-weekly {}", env!("BUILD_INFO"))),
-        footnote("编辑：@大头大头大 | 二创筛选：@SkyBigBlack"),
+        footnote("编辑：@大头大头大 | 二创筛选：@SkyBigBlack | 美工：@GhrotHHH"),
         footnote("日报文案：【】|  GIF制作：【】"),
     ]
 }
@@ -228,7 +252,7 @@ async fn gen_article_elements(
     videos.sort_unstable_by_key(|(name, _)| WEIGHT.get(name.as_str()).unwrap_or(&99999));
 
     // 导言
-    let mut elements = header();
+    let mut elements = header(date);
 
     // 视频
     elements.extend(video_header());
